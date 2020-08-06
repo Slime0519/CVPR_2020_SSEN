@@ -7,12 +7,12 @@ The paper attached Similairity Search and Extraction Network(SSEN) to baseline, 
 
 ![](/Description%20image/Baseline&SSEN.png)
 
-###Baseline
+### Baseline
 Original baseline model is network called stacked residual blocks from 
 [Enhanced Deep Residual Networks for Single Image Super-Resolution (CVPR 2017)](https://arxiv.org/pdf/1707.02921.pdf),
 which consist of residual blocks without BN.
 
-###SSEN
+### SSEN
 According to original paper, SSEN extracts features from the reference images in an aligned form, matching the contents 
 in the pixel space without any flow supervision.   
 Authors use Deformable Convolution layers in a Sequential approch, and found three 

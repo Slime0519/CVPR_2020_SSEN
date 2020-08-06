@@ -60,11 +60,11 @@ attention in each level of scale.
 3. Training & Test
     - [ ] implementation Training code
         - using ADAM optimizer 
-           - lr : 1e^-4
-           - b1,b2 = 0.9, 0.999
-           - batch size : 32
-           - epochs : 100k
-           - lr scheduling : consine learning rate schedule, gamma = 0.9
+        - lr : 1e^-4
+        - b1,b2 = 0.9, 0.999
+        - batch size : 32
+        - epochs : 100k
+        - lr scheduling : consine learning rate schedule, gamma = 0.9
     - [ ] implementation evaluation code
    
 4. Additional Task

@@ -1,6 +1,7 @@
 # CVPR_2020_SSEN
 This repository contains my implementation RefSR method proposed in   
-[Robust Reference-based Super-Resolution with Similarity-Aware Deformable Convolution (CVPR 2020)](https://openaccess.thecvf.com/content_CVPR_2020/papers/Shim_Robust_Reference-Based_Super-Resolution_With_Similarity-Aware_Deformable_Convolution_CVPR_2020_paper.pdf)
+[Robust Reference-based Super-Resolution with Similarity-Aware Deformable Convolution (CVPR 2020)](
+https://openaccess.thecvf.com/content_CVPR_2020/papers/Shim_Robust_Reference-Based_Super-Resolution_With_Similarity-Aware_Deformable_Convolution_CVPR_2020_paper.pdf)
 
 ## Implementation Details
 The paper attached Similairity Search and Extraction Network(SSEN) to baseline, for improvement of RefSR task.
@@ -29,3 +30,49 @@ Dynamic offset estimator contains non-local blocks, for improvement of feature e
 In paper, authors description non-local blocks in the dynamic offset estimator that the features are amplified with
 attention in each level of scale.
 
+## Implementation
+
+## To-Do list
+
+- Network implementation   
+    - baseline
+    - [ ] Baseline implementation(stacked residual blocks)
+    - SSEN
+        - implementation deformconv
+        - [ ] Study code of Deformable Convolutional Network
+        - [ ] implementation Dynamic Offset Estimator(DOE)
+            - implementation non-local block
+        - [ ] combine two module(DOE, original DeformConv)
+        - make entire SSEN structure
+        - [ ] connect with feature extractor in baseline
+        - [ ] append deformconv blocks sequentially
+    - connect two network
+        - [ ] summary two models  using pysummary library
+        - [ ] attach SSEN to Baseline of RefSR network
+- Dataset and preprocessing
+    - [ ] get CUFED dataset for training
+    - [ ] get CUFED5 dataset for test
+    - [ ] implementation Dataloader for each tasks(training, vaild, evaluation)
+        - apply random 90 degree rotation for augmentation 
+        - scaling factor : 4
+- Training & Test
+    - [ ] implementation Training code
+        - using ADAM optimizer 
+           - lr : 1e^-4
+           - b1,b2 = 0.9, 0.999
+           - batch size : 32
+           - epochs : 100k
+           - lr scheduling : consine learning rate schedule, gamma = 0.9
+    - [ ] implementation evaluation code
+- Additional Task
+    - [ ] Attach GAN module(PatchGAN)
+
+
+## References
+1. [Robust Reference-based Super-Resolution with Similarity-Aware Deformable Convolution (CVPR 2020)](
+https://openaccess.thecvf.com/content_CVPR_2020/papers/Shim_Robust_Reference-Based_Super-Resolution_With_Similarity-Aware_Deformable_Convolution_CVPR_2020_paper.pdf
+)
+2. [Deformable Convolutional Networks (CVPR 2017)](https://arxiv.org/pdf/1703.06211.pdf)
+3. [Non-local Neural Networks (CVPR 2018)](https://arxiv.org/pdf/1711.07971.pdf)
+4. [Image Super-Resolution by Neural Texture Transfer (CVPR 2019)](https://arxiv.org/pdf/1903.00834.pdf)
+5. [Enhanced Deep Residual Networks for Single Image Super-Resolution (CVPR 2017)](https://arxiv.org/pdf/1707.02921.pdf)

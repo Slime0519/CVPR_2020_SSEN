@@ -36,25 +36,27 @@ attention in each level of scale.
 
 - Network implementation   
     - baseline
-    - [ ] Baseline implementation(stacked residual blocks)
+        - [ ] Baseline implementation(stacked residual blocks)
     - SSEN
         - implementation deformconv
-        - [ ] Study code of Deformable Convolutional Network
-        - [ ] implementation Dynamic Offset Estimator(DOE)
-            - implementation non-local block
-        - [ ] combine two module(DOE, original DeformConv)
+            - [ ] Study code of Deformable Convolutional Network
+            - [ ] implementation Dynamic Offset Estimator(DOE)
+                + implementation non-local block
+            - [ ] combine two module(DOE, original DeformConv)
         - make entire SSEN structure
-        - [ ] connect with feature extractor in baseline
-        - [ ] append deformconv blocks sequentially
+            - [ ] connect with feature extractor in baseline
+            - [ ] append deformconv blocks sequentially
     - connect two network
         - [ ] summary two models  using pysummary library
         - [ ] attach SSEN to Baseline of RefSR network
+    
 - Dataset and preprocessing
     - [ ] get CUFED dataset for training
     - [ ] get CUFED5 dataset for test
     - [ ] implementation Dataloader for each tasks(training, vaild, evaluation)
         - apply random 90 degree rotation for augmentation 
         - scaling factor : 4
+    
 - Training & Test
     - [ ] implementation Training code
         - using ADAM optimizer 
@@ -64,6 +66,7 @@ attention in each level of scale.
            - epochs : 100k
            - lr scheduling : consine learning rate schedule, gamma = 0.9
     - [ ] implementation evaluation code
+   
 - Additional Task
     - [ ] Attach GAN module(PatchGAN)
 

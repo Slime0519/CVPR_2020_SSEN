@@ -47,3 +47,8 @@ class Baseline_residual_block(nn.Module):
         out = torch.add(out,x)
 
         return out
+
+class Feature_extractor_in_SSEN(nn.Module):
+    def __init__(self, input_channel, output_channel):
+        super(Feature_extractor_in_SSEN, self).__init__()
+        self.conv1 = nn.Conv2d(in_channels=input_channel, out_channels=output_channel, kernel_size=3, padding='same', bias = False)

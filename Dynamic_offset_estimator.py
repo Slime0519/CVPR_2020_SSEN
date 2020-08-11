@@ -1,43 +1,58 @@
 import torch.nn as nn
 import torch
 
-class Deformable_Convolution(nn.Module):
-    def __init__(self):
-        super(Deformable_Convolution, self).__init__()
-
 class Dynamic_offset_estimator(nn.Module):
     def __init__(self,input_channelsize):
         super(Dynamic_offset_estimator, self).__init__()
-        self.inputchannel = input_channelsize
+        self.downblock1 = self.downsample_block(input_channelsize)
+        self.downblock2 = self.downsample_block(64)
+        self.downblock3 = self.downsample_block(64)
 
-        self.halfscale_pre = self.pre_nonlocal_block(input_channelsize)
-        self.halfscale_NLblock = Nonlocal_block(input_channelsize=64)
-        self.halfscale_post = self.post_nonlocal_block()
+        self.attentionblock1 = Nonlocal_block(input_channelsize=64)
+        self.attentionblock2 = Nonlocal_block(input_channelsize=64)
+        self.attentionblock3 = Nonlocal_block(input_channelsize=64)
 
-        self.quarterscale_pre = self.pre_nonlocal_block(input_channelsize)
-        self.quarterscale_NLblock = Nonlocal_block(input_channelsize=64)
-        self.quarterscale_post = self.post_nonlocal_block()
+        self.upblock1 = self.upsample_block()
+        self.upblock2 = self.upsample_block()
+        self.upblock3 = self.upsample_block()
 
-        self.octascale_pre = self.pre_nonlocal_block(input_channelsize)
-        self.octascale_NLblock = Nonlocal_block(input_channelsize=64)
-        self.octascale_post = self.post_nonlocal_block()
+    def forward(self,x):
+        halfscale_feature = self.downblock1(x)
+        quarterscale_feature = self.downblock2(halfscale_feature)
+        octascale_feature = self.downblock3(quarterscale_feature)
 
+        octascale_NLout = self.attentionblock1(octascale_feature)
+        octascale_NLout = octascale_NLout + octascale_feature
+        octascale_upsampled = self.upblock1(octascale_NLout)
 
-    def pre_nonlocal_block(self,input_channelsize):
+        quarterscale_NLout = self.attentionblock2(octascale_upsampled)
+        quarterscale_NLout = quarterscale_NLout + quarterscale_feature
+        quarterscale_upsampled = self.upblock2(quarterscale_NLout)
+
+        halfscale_NLout = self.attentionblock3(quarterscale_upsampled)
+        halfscale_NLout = halfscale_NLout + halfscale_feature
+        halfscale_upsampled = self.upblock3(halfscale_NLout)
+
+        return halfscale_upsampled
+
+    def downsample_block(self, input_channelsize):
         layers = []
-        layers.append(nn.Conv2d(in_channels=input_channelsize, out_channels=64, kernel_size=3, stride=2, padding=1, bias = False))
+        layers.append(
+            nn.Conv2d(in_channels=input_channelsize, out_channels=64, kernel_size=3, stride=2, padding=1, bias=False))
         layers.append(nn.LeakyReLU(inplace=True))
 
         pre_model = nn.Sequential(*layers)
         return pre_model
 
-    def post_nonlocal_block(self):
+    def upsample_block(self):
         layers = []
-        layers.append(nn.ConvTranspose2d(in_channels=64, out_channels=64, kernel_size=3, stride=2,padding=1, bias= False))
+        layers.append(
+            nn.ConvTranspose2d(in_channels=64, out_channels=64, kernel_size=3, stride=2, padding=1, bias=False))
         layers.append(nn.LeakyReLU(inplace=True))
 
         post_model = nn.Sequential(*layers)
         return post_model
+
 
 class Nonlocal_block(nn.Module):
     def __init__(self,input_channelsize , mode = 'EmbeddedG', dimension = 2):

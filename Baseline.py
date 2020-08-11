@@ -27,7 +27,7 @@ class Baseline(nn.Module):
         return blockpart_model
 
     def forward(self,x):
-        out = self.conv1(x)
+      #  out = self.conv1(x)
         out = self.residual_blocks(out)
         out = self.upscaling_4x(out)
         out = self.outconv(out)
@@ -52,3 +52,7 @@ class Feature_extractor_in_SSEN(nn.Module):
     def __init__(self, input_channel, output_channel):
         super(Feature_extractor_in_SSEN, self).__init__()
         self.conv1 = nn.Conv2d(in_channels=input_channel, out_channels=output_channel, kernel_size=3, padding='same', bias = False)
+
+    def forward(self,x):
+        out = self.con1(x)
+        return out

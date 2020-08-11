@@ -7,8 +7,16 @@ from torch_deform_conv.layers import ConvOffset2D
 class SSEN(nn.Module):
     def __init__(self,in_channels, out_channels):
         super(SSEN, self).__init__()
+        self.deformblock1 = Deformable_Conv_Block(input_channels= in_channels*2)
+        self.deformblock2 = Deformable_Conv_Block(input_channels= in_channels*2)
+        self.deformblock3 = Deformable_Conv_Block(input_channels=in_channels*2)
 
+    def forward(self,lr_batch, init_hr_batch):
+        hr_out1 = self.deformblock1(lr_batch, init_hr_batch)
+        hr_out2 = self.deformblock2(lr_batch, hr_out1)
+        hr_out3 = self.deformblock3(lr_batch, hr_out2)
 
+        return hr_out3
 
 class Deformable_Conv_Block(nn.Module):
     def __init__(self,input_channels):

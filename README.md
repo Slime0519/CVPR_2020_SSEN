@@ -81,3 +81,4 @@ https://openaccess.thecvf.com/content_CVPR_2020/papers/Shim_Robust_Reference-Bas
 4. [Image Super-Resolution by Neural Texture Transfer (CVPR 2019)](https://arxiv.org/pdf/1903.00834.pdf)
 5. [Enhanced Deep Residual Networks for Single Image Super-Resolution (CVPR 2017)](https://arxiv.org/pdf/1707.02921.pdf)
 6. [TDAN: Temporally Deformable Alignment Network for Video Super-Resolution (CVPR 2018)](https://arxiv.org/pdf/1812.02898.pdf)
+7. [EDVR: Video Restoration with Enhanced Deformable Convolutional Networks (CVPR 2019)](https://arxiv.org/pdf/1905.02716.pdf)

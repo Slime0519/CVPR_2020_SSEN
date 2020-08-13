@@ -67,7 +67,7 @@ class Nonlocal_block(nn.Module):
         self.glayer = nn.Conv2d(in_channels=input_channelsize, out_channels=self.bottleneck_channel, kernel_size=1, bias = False)
 
         self.lastlayer = nn.Conv2d(in_channels=self.bottleneck_channel , out_channels=input_channelsize, kernel_size=1, bias=False)
-
+        self.bn = nn.BatchNorm2d(num_features=input_channelsize)
     def forward(self,x):
         #x= torch.Tensor(x)
 
@@ -92,6 +92,7 @@ class Nonlocal_block(nn.Module):
         third_input = third_input.view(batch_size,self.bottleneck_channel,x.size(2),x.size(3))
 
         final_output = self.lastlayer(third_input)
+        final_output = self.bn(final_output)
         residual_output = final_output + x
 
         return residual_output

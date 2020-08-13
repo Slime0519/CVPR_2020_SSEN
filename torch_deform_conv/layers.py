@@ -34,7 +34,7 @@ class ConvOffset2D(nn.Module):
         self._grid_param = None
        # super(ConvOffset2D, self).__init__(self.filters, self.filters*2, 3, padding=1, bias=False, **kwargs)
         super(ConvOffset2D, self).__init__()
-        self.weight.data.copy_(self._init_weights(self.weight, init_normal_stddev))
+      # self.weight.data.copy_(self._init_weights(self.weight, init_normal_stddev))
 
        # self.offset_network = Dynamic_offset_estimator(input_channelsize=filters)
 

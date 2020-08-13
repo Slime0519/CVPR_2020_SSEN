@@ -3,14 +3,24 @@ import torch.nn as nn
 from SSEN import SSEN
 import torchsummary
 
+
+def make_residual_block(blocknum=32, input_channel = 256, output_channel = 256):
+    residual_layers = []
+    residual_layers.append(residual_block(input_channel=input_channel, output_channel = output_channel))
+    for i in range(blocknum-1):
+        residual_layers.append(residual_block(input_channel=output_channel, output_channel = output_channel))
+    blockpart_model = nn.Sequential(*residual_layers)
+    return blockpart_model
+
 class Baseline(nn.Module):
     def __init__(self, num_channel = 256):
         super(Baseline, self).__init__()
        # self.conv1 = nn.Conv2d(in_channels=3,out_channels=num_channel, kernel_size=3, padding=1, bias=False)
-        self.feature_extractor = Feature_extractor_in_SSEN(input_channel=3, output_channel=num_channel)
+        self.feature_extractor = make_residual_block(blocknum=5,input_channel=3, output_channel=num_channel)
+        #self.feature_extractor = Feature_extractor_in_SSEN(input_channel=3, output_channel=num_channel)
         self.SSEN_Network = SSEN(in_channels=num_channel)
 
-        self.residual_blocks = self.make_residual_block(blocknum=32)
+        self.residual_blocks = make_residual_block(blocknum=32)
 
         self.upscaling_4x = nn.Sequential(
             nn.Conv2d(in_channels=num_channel, out_channels=4*num_channel, kernel_size=3, padding=1, bias = False),
@@ -21,13 +31,6 @@ class Baseline(nn.Module):
 
         self.outconv = nn.Conv2d(in_channels=num_channel, out_channels=3, kernel_size=3, padding=1, bias=False)
 
-    def make_residual_block(self, blocknum = 32):
-        residual_layers = []
-
-        for i in range(blocknum):
-            residual_layers.append(Baseline_residual_block())
-        blockpart_model = nn.Sequential(*residual_layers)
-        return blockpart_model
 
     def forward(self,input_lr, ref_input):
       #  out = self.conv1(x)
@@ -41,12 +44,12 @@ class Baseline(nn.Module):
         out = self.outconv(out)
         return out
 
-class Baseline_residual_block(nn.Module):
+class residual_block(nn.Module):
     def __init__(self, input_channel = 256, output_channel = 256):
-        super(Baseline_residual_block, self).__init__()
+        super(residual_block, self).__init__()
 
-        self.conv1 = nn.Conv2d(in_channels=input_channel,out_channels=64, kernel_size=3, padding=1, bias=False)
-        self.conv2 = nn.Conv2d(in_channels=64,out_channels=output_channel, kernel_size=3, padding=1, bias = False)
+        self.conv1 = nn.Conv2d(in_channels=input_channel,out_channels=input_channel, kernel_size=3, padding=1, bias=False)
+        self.conv2 = nn.Conv2d(in_channels=input_channel,out_channels=output_channel, kernel_size=3, padding=1, bias = False)
         self.relu = nn.ReLU(inplace=True)
 
     def forward(self,x):
@@ -56,16 +59,16 @@ class Baseline_residual_block(nn.Module):
         out = torch.add(out,x)
 
         return out
-
+"""
 class Feature_extractor_in_SSEN(nn.Module):
     def __init__(self, input_channel, output_channel):
         super(Feature_extractor_in_SSEN, self).__init__()
-        self.conv1 = nn.Conv2d(in_channels=input_channel, out_channels=output_channel, kernel_size=3, padding=1, bias = False)
+        #self.extraction_network =
 
-    def forward(self,x):
-        out = self.conv1(x)
-        return out
-
+   # def forward(self,x):
+     #   out = self.extraction_network(x)
+     #  return out
+"""
 class L1_Charbonnier_loss(nn.Module):
     """L1 Charbonnierloss."""
     def __init__(self):
@@ -74,7 +77,7 @@ class L1_Charbonnier_loss(nn.Module):
 
     def forward(self, X, Y):
         diff = torch.add(X, -Y)
-        error = torch.sqrt( diff * diff + self.eps )
+        error = torch.sqrt( diff * diff + self.eps)
         loss = torch.sum(error)
         return loss
 
@@ -82,4 +85,4 @@ if __name__ == "__main__":
     testmodel = Baseline(num_channel=256)
     model_layerlist = (list(testmodel.children()))
     print(model_layerlist)
-    #torchsummary.summary(testmodel,(3,160,160),device='cpu')
+   # torchsummary.summary(testmodel,(3,160,160),(3,160,160),device='cpu')

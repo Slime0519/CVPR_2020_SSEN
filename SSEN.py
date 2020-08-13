@@ -20,6 +20,7 @@ class SSEN(nn.Module):
 
 class Deformable_Conv_Block(nn.Module):
     def __init__(self,input_channels):
+        super(Deformable_Conv_Block, self).__init__()
         self.offset_estimator = Dynamic_offset_estimator(input_channelsize=input_channels)
         self.offset_generator = ConvOffset2D(filters = input_channels)
 

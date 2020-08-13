@@ -39,10 +39,10 @@ def lr_transform(image_size, rotate=0, upscale_factor = 4, mode = 'train'):
 
 
 class Dataset_Train(Dataset):
-    def __init__(self, dirpath_lr, dirpath_hr, upscale_factor = 4):
+    def __init__(self, dirpath_input, dirpath_ref, upscale_factor = 4):
         super(Dataset_Train, self).__init__()
-        self.imagelist_input = glob.glob(os.path.join(dirpath_lr,"*.png"))
-        self.imagelist_ref = glob.glob(os.path.join(dirpath_hr, "*.png"))
+        self.imagelist_input = glob.glob(os.path.join(dirpath_input,"*.png"))
+        self.imagelist_ref = glob.glob(os.path.join(dirpath_ref, "*.png"))
         self.upscalefactor = upscale_factor
 
     def __getitem__(self, index):

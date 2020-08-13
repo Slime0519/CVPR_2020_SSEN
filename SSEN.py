@@ -5,7 +5,7 @@ from Dynamic_offset_estimator import Dynamic_offset_estimator
 from torch_deform_conv.layers import ConvOffset2D
 
 class SSEN(nn.Module):
-    def __init__(self,in_channels, out_channels):
+    def __init__(self,in_channels):
         super(SSEN, self).__init__()
         self.deformblock1 = Deformable_Conv_Block(input_channels= in_channels*2)
         self.deformblock2 = Deformable_Conv_Block(input_channels= in_channels*2)

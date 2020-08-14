@@ -12,11 +12,29 @@ def make_residual_block(blocknum=32, input_channel = 256, output_channel = 256):
     blockpart_model = nn.Sequential(*residual_layers)
     return blockpart_model
 
+def make_downsampling_network(layernum = 2, in_channels = 3, out_channels = 256):
+    layers = []
+    layers.append(nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=3, stride=2, bias=False, padding=1))
+    for _ in range(layernum-1):
+        layers.append(nn.Conv2d(in_channels=out_channels, out_channels=out_channels, kernel_size=3, stride=2, bias=False,padding=1))
+    print(layers)
+    model = nn.Sequential(*layers)
+    return model
+
+
 class Baseline(nn.Module):
-    def __init__(self, num_channel = 256):
+    def __init__(self, num_channel = 256, mode = "RefSR"):
         super(Baseline, self).__init__()
+        self.mode = mode
+        self.feature_extractor = make_residual_block(blocknum=5, input_channel=3, output_channel=num_channel)
+
+        if mode == "RefSR":
+            self.downsampling_network = make_downsampling_network(layernum=2, in_channels=3, out_channels=64)
+            self.lrfeature_scaler = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=1, bias=False)
+            self.feature_extractor = make_residual_block(blocknum=5, input_channel=64, output_channel=256)
+
        # self.conv1 = nn.Conv2d(in_channels=3,out_channels=num_channel, kernel_size=3, padding=1, bias=False)
-        self.feature_extractor = make_residual_block(blocknum=5,input_channel=3, output_channel=num_channel)
+
         #self.feature_extractor = Feature_extractor_in_SSEN(input_channel=3, output_channel=num_channel)
         self.SSEN_Network = SSEN(in_channels=num_channel)
 
@@ -34,6 +52,11 @@ class Baseline(nn.Module):
 
     def forward(self,input_lr, ref_input):
       #  out = self.conv1(x)
+        if self.mode == "RefSR":
+            print(ref_input.shape)
+            ref_input = self.downsampling_network(ref_input)
+            input_lr = self.lrfeature_scaler(input_lr)
+
         lr_feature_out = self.feature_extractor(input_lr)
         ref_feature_out = self.feature_extractor(ref_input)
         SSEN_out = self.SSEN_Network(lr_batch = lr_feature_out ,init_hr_batch = ref_feature_out)
@@ -80,6 +103,7 @@ class L1_Charbonnier_loss(nn.Module):
         error = torch.sqrt( diff * diff + self.eps)
         loss = torch.sum(error)
         return loss
+
 
 if __name__ == "__main__":
     testmodel = Baseline(num_channel=256)

@@ -45,7 +45,7 @@ class ConvOffset2D(nn.Module):
 
         # offsets: (b*c, h, w, 2)
         offsets = self._to_bc_h_w_2(offsets, x_shape)
-
+        print("off size in class : {}".format(offsets.shape))
         # x: (b*c, h, w)
         x = self._to_bc_h_w(x, x_shape)
 

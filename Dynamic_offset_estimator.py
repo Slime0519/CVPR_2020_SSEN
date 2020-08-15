@@ -16,6 +16,8 @@ class Dynamic_offset_estimator(nn.Module):
         self.upblock2 = self.upsample_block()
         self.upblock3 = self.upsample_block()
 
+        self.channelscaling_block = nn.Conv2d(in_channels= 64, out_channels=input_channelsize, kernel_size=3, padding=1, bias=False)
+
     def forward(self,x):
         halfscale_feature = self.downblock1(x)
         quarterscale_feature = self.downblock2(halfscale_feature)
@@ -23,7 +25,9 @@ class Dynamic_offset_estimator(nn.Module):
 
         octascale_NLout = self.attentionblock1(octascale_feature)
         octascale_NLout = octascale_NLout + octascale_feature
+       # print("octascale : {}".format(octascale_NLout.shape))
         octascale_upsampled = self.upblock1(octascale_NLout)
+      #  print("octascale_up : {}".format(octascale_upsampled.shape))
 
         quarterscale_NLout = self.attentionblock2(octascale_upsampled)
         quarterscale_NLout = quarterscale_NLout + quarterscale_feature
@@ -32,8 +36,10 @@ class Dynamic_offset_estimator(nn.Module):
         halfscale_NLout = self.attentionblock3(quarterscale_upsampled)
         halfscale_NLout = halfscale_NLout + halfscale_feature
         halfscale_upsampled = self.upblock3(halfscale_NLout)
+     #   print("offset size : {}".format(halfscale_upsampled.shape))
 
-        return halfscale_upsampled
+        out = self.channelscaling_block(halfscale_upsampled)
+        return out
 
     def downsample_block(self, input_channelsize):
         layers = []
@@ -44,10 +50,14 @@ class Dynamic_offset_estimator(nn.Module):
         pre_model = nn.Sequential(*layers)
         return pre_model
 
-    def upsample_block(self):
+    def upsample_block(self, in_odd = True):
         layers = []
-        layers.append(
-            nn.ConvTranspose2d(in_channels=64, out_channels=64, kernel_size=3, stride=2, padding=1, bias=False))
+        if in_odd:
+            layers.append(
+                nn.ConvTranspose2d(in_channels=64, out_channels=64, kernel_size=3, stride=2, padding=1, output_padding=1, bias=False))
+        else :
+            layers.append(
+                nn.ConvTranspose2d(in_channels=64, out_channels=64, kernel_size=3, stride=2, padding=0, bias=False))
         layers.append(nn.LeakyReLU(inplace=True))
 
         post_model = nn.Sequential(*layers)
@@ -66,6 +76,7 @@ class Nonlocal_block(nn.Module):
 
         self.glayer = nn.Conv2d(in_channels=input_channelsize, out_channels=self.bottleneck_channel, kernel_size=1, bias = False)
 
+        self.softmax = nn.Softmax()
         self.lastlayer = nn.Conv2d(in_channels=self.bottleneck_channel , out_channels=input_channelsize, kernel_size=1, bias=False)
         self.bn = nn.BatchNorm2d(num_features=input_channelsize)
     def forward(self,x):
@@ -75,17 +86,20 @@ class Nonlocal_block(nn.Module):
 
         theta_output = self.thetalayer(x)
         theta_output = theta_output.view(batch_size, self.bottleneck_channel,-1)
-        theta_output = theta_output.view((0,2,1))  #convert H x W X channels to HW X channels matrix
+        #print("theta output : {}".format(theta_output.shape))
+        theta_output = theta_output.permute(0,2,1)  #convert H x W X channels to HW X channels matrix
 
         phi_output = self.philayer(x)
         phi_output = phi_output.view(batch_size, self.bottleneck_channel, -1)
+        #print("phi output : {}".format(phi_output.shape))
 
         g_output = self.glayer(x)
         g_output = g_output.view(batch_size, self.bottleneck_channel, -1)
         g_output = g_output.permute((0,2,1))
-
+        #print("goutput : {}".format(g_output.shape))
         compressed_matrix = torch.matmul(theta_output,phi_output)
-        compressed_matrix = nn.Softmax2d(compressed_matrix)
+        #print(compressed_matrix.shape)
+        compressed_matrix = self.softmax(compressed_matrix)
 
         third_input = torch.matmul(compressed_matrix,g_output)
         third_input = third_input.permute((0,2,1)).contiguous()

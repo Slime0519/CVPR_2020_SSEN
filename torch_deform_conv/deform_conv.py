@@ -180,9 +180,10 @@ def th_batch_map_offsets(input, offsets, grid=None, order=1):
     input_width = input.size(2)
 
     offsets = offsets.view(batch_size, -1, 2)
+
     if grid is None:
         grid = th_generate_grid(batch_size, input_height, input_width, offsets.data.type(), offsets.data.is_cuda)
-
+    print("in_thbatchmap - offset : {}, grid : {}".format(offsets.shape,grid.shape))
     coords = offsets + grid
 
     mapped_vals = th_batch_map_coordinates(input, coords)

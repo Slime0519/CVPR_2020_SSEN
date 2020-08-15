@@ -4,7 +4,7 @@ from SSEN import SSEN
 import torchsummary
 
 
-def make_residual_block(blocknum=32, input_channel = 256, output_channel = 256):
+def make_residual_block(blocknum=32, input_channel = 64, output_channel = 64):
     residual_layers = []
     residual_layers.append(residual_block(input_channel=input_channel, output_channel = output_channel))
     for i in range(blocknum-1):
@@ -12,7 +12,7 @@ def make_residual_block(blocknum=32, input_channel = 256, output_channel = 256):
     blockpart_model = nn.Sequential(*residual_layers)
     return blockpart_model
 
-def make_downsampling_network(layernum = 2, in_channels = 3, out_channels = 256):
+def make_downsampling_network(layernum = 2, in_channels = 3, out_channels = 64):
     layers = []
     layers.append(nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=3, stride=2, bias=False, padding=1))
     for _ in range(layernum-1):
@@ -21,17 +21,19 @@ def make_downsampling_network(layernum = 2, in_channels = 3, out_channels = 256)
     model = nn.Sequential(*layers)
     return model
 
-
 class Baseline(nn.Module):
-    def __init__(self, num_channel = 256, mode = "RefSR"):
+    def __init__(self, num_channel = 64, mode = "RefSR"):
         super(Baseline, self).__init__()
         self.mode = mode
-        self.feature_extractor = make_residual_block(blocknum=5, input_channel=3, output_channel=num_channel)
+        self.feature_extractor = make_residual_block(blocknum=5, input_channel=3, output_channel=64)
 
+        #referenced by EDVR paper implementation code
+        #https://github.com/xinntao/EDVR/blob/master/basicsr/models/archs/edvr_arch.py line 251
         if mode == "RefSR":
             self.downsampling_network = make_downsampling_network(layernum=2, in_channels=3, out_channels=64)
             self.lrfeature_scaler = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=1, bias=False)
-            self.feature_extractor = make_residual_block(blocknum=5, input_channel=64, output_channel=256)
+            self.feature_extractor = make_residual_block(blocknum=5, input_channel=64, output_channel=64)
+
 
        # self.conv1 = nn.Conv2d(in_channels=3,out_channels=num_channel, kernel_size=3, padding=1, bias=False)
 

@@ -71,7 +71,7 @@ class Dataset_Train(Dataset):
         lr_image = self.lr_transform(npimage_input)
         hr_image = self.hr_transform(npimage_input)
         ref_image = self.hr_transform(npimage_ref)
-        print("{} : lr : {}  / hr : {} / ref : {} ".format(index,lr_image.shape, hr_image.shape, ref_image.shape))
+       # print("{} : lr : {}  / hr : {} / ref : {} ".format(index,lr_image.shape, hr_image.shape, ref_image.shape))
 
         return lr_image, hr_image, ref_image
 

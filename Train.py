@@ -87,7 +87,7 @@ if __name__ == "__main__":
         loss_array_Train[epoch] = loss/len(Train_Dataloader)
 
         print("Training average PSNR : {}, loss : {}".format(PSNR_array_Train[epoch], loss_array_Train[epoch]))
-
+        """
         Model.eval()
         avg_PSNR = 0
         print("----Evaluation Step----")
@@ -102,7 +102,7 @@ if __name__ == "__main__":
 
             PSNR_array_Vaild[epoch] = avg_PSNR/len(Vaild_Dataloader)
             print("evaluation average PSNR : {}".format(PSNR_array_Vaild[epoch]))
-
+        """
         if (epoch+1) % 1000 == 0:
             np.save(os.path.join(ResultSave_PATH,"Training_Average_PSNR.npy"),PSNR_array_Train)
             np.save(os.path.join(ResultSave_PATH,"Training_Average_loss.npy"),loss_array_Train)

@@ -58,12 +58,14 @@ if __name__ == "__main__":
     PSNR_array_Train = np.zeros(TOTAL_EPOCHS)
     PSNR_array_Vaild = np.zeros(TOTAL_EPOCHS)
 
+    trainloader_len = len(Train_Dataloader)
+
     for epoch in range(TOTAL_EPOCHS):
         Model.train()
         avg_PSNR = 0
         avg_loss = 0
         print("----Training step-----")
-        for lr_image, hr_image, ref_image in Train_Dataloader:
+        for i,(lr_image, hr_image, ref_image) in enumerate(Train_Dataloader):
             lr_image, hr_image, ref_image = lr_image.to(device), hr_image.to(device), ref_image.to(device)
             optimizer.zero_grad()
 
@@ -77,6 +79,7 @@ if __name__ == "__main__":
 
             loss.backward()
             optimizer.step()
+            print("epoch {} training step : {}/{}".format(epoch + 1, i + 1, trainloader_len))
 
         cosine_scheduler.step()
 
@@ -84,7 +87,7 @@ if __name__ == "__main__":
         loss_array_Train[epoch] = loss/len(Train_Dataloader)
 
         print("Training average PSNR : {}, loss : {}".format(PSNR_array_Train[epoch], loss_array_Train[epoch]))
-
+        """
         Model.eval()
         avg_PSNR = 0
         print("----Evaluation Step----")
@@ -99,7 +102,7 @@ if __name__ == "__main__":
 
             PSNR_array_Vaild[epoch] = avg_PSNR/len(Vaild_Dataloader)
             print("evaluation average PSNR : {}".format(PSNR_array_Vaild[epoch]))
-
+        """
         if (epoch+1) % 1000 == 0:
             np.save(os.path.join(ResultSave_PATH,"Training_Average_PSNR.npy"),PSNR_array_Train)
             np.save(os.path.join(ResultSave_PATH,"Training_Average_loss.npy"),loss_array_Train)

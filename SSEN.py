@@ -27,15 +27,15 @@ class Deformable_Conv_Block(nn.Module):
         self.conv1 = nn.Conv2d(64, out_channels=input_channels, kernel_size=3, padding=1, bias = False)
 
     def forward(self,lr_features, hr_features):
-        print("lr feature shape : {}".format(lr_features.shape))
-        print("hr feature shape : {}".format(hr_features.shape))
+      #  print("lr feature shape : {}".format(lr_features.shape))
+       # print("hr feature shape : {}".format(hr_features.shape))
         input_offset = torch.cat((lr_features,hr_features),dim=1)
 
         estimated_offset = self.offset_estimator(input_offset)
 
-        print("offset size : {}".format(estimated_offset.shape))
+       # print("offset size : {}".format(estimated_offset.shape))
         gend_offset = self.offset_generator(hr_features, estimated_offset)
-        print("generated offset size : {}".format(gend_offset.shape))
+       # print("generated offset size : {}".format(gend_offset.shape))
         output = self.conv1(gend_offset)
 
         return output

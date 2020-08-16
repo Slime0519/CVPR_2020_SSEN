@@ -40,7 +40,8 @@ class Baseline(nn.Module):
         #self.feature_extractor = Feature_extractor_in_SSEN(input_channel=3, output_channel=num_channel)
         self.SSEN_Network = SSEN(in_channels=num_channel)
 
-        self.residual_blocks = make_residual_block(blocknum=32)
+        self.preprocessing_residual_block = nn.Conv2d(in_channels=128, out_channels=64, kernel_size=1, bias=False)
+        self.residual_blocks = make_residual_block(blocknum=32, input_channel=64, output_channel=64)
 
         self.upscaling_4x = nn.Sequential(
             nn.Conv2d(in_channels=num_channel, out_channels=4*num_channel, kernel_size=3, padding=1, bias = False),
@@ -55,15 +56,19 @@ class Baseline(nn.Module):
     def forward(self,input_lr, ref_input):
       #  out = self.conv1(x)
         if self.mode == "RefSR":
-            print(ref_input.shape)
+          #  print(ref_input.shape)
             ref_input = self.downsampling_network(ref_input)
             input_lr = self.lrfeature_scaler(input_lr)
 
         lr_feature_out = self.feature_extractor(input_lr)
         ref_feature_out = self.feature_extractor(ref_input)
         SSEN_out = self.SSEN_Network(lr_batch = lr_feature_out ,init_hr_batch = ref_feature_out)
-        residual_input = torch.cat((lr_feature_out, SSEN_out), dim = 0)
-        out = self.residual_blocks(residual_input)
+        residual_input = torch.cat((lr_feature_out, SSEN_out), dim = 1)
+    #    print("residual input size : {}".format(residual_input.shape))
+        residual_input_scaled = self.preprocessing_residual_block(residual_input)
+        out = self.residual_blocks(residual_input_scaled)
+
+       # print("size : out {}  lrfeature {}".format(out.shape,lr_feature_out.shape))
         out = torch.add(out,lr_feature_out)
         out = self.upscaling_4x(out)
         out = self.outconv(out)

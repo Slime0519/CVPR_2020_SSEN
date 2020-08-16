@@ -58,12 +58,14 @@ if __name__ == "__main__":
     PSNR_array_Train = np.zeros(TOTAL_EPOCHS)
     PSNR_array_Vaild = np.zeros(TOTAL_EPOCHS)
 
+    trainloader_len = len(Train_Dataloader)
+
     for epoch in range(TOTAL_EPOCHS):
         Model.train()
         avg_PSNR = 0
         avg_loss = 0
         print("----Training step-----")
-        for lr_image, hr_image, ref_image in Train_Dataloader:
+        for i,(lr_image, hr_image, ref_image) in enumerate(Train_Dataloader):
             lr_image, hr_image, ref_image = lr_image.to(device), hr_image.to(device), ref_image.to(device)
             optimizer.zero_grad()
 
@@ -77,6 +79,7 @@ if __name__ == "__main__":
 
             loss.backward()
             optimizer.step()
+            print("epoch {} training step : {}/{}".format(epoch + 1, i + 1, trainloader_len))
 
         cosine_scheduler.step()
 

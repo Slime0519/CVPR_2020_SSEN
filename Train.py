@@ -81,6 +81,7 @@ if __name__ == "__main__":
             optimizer.step()
             print("epoch {} training step : {}/{}".format(epoch + 1, i + 1, trainloader_len))
 
+
         cosine_scheduler.step()
 
         PSNR_array_Train[epoch] = avg_PSNR/len(Train_Dataloader)
@@ -103,7 +104,7 @@ if __name__ == "__main__":
             PSNR_array_Vaild[epoch] = avg_PSNR/len(Vaild_Dataloader)
             print("evaluation average PSNR : {}".format(PSNR_array_Vaild[epoch]))
         """
-        if (epoch+1) % 1000 == 0:
+        if (epoch+1) % 100 == 0:
             np.save(os.path.join(ResultSave_PATH,"Training_Average_PSNR.npy"),PSNR_array_Train)
             np.save(os.path.join(ResultSave_PATH,"Training_Average_loss.npy"),loss_array_Train)
             np.save(os.path.join(ResultSave_PATH,"Vaild_Average_PSNR.npy"),PSNR_array_Vaild)

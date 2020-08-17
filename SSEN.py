@@ -24,7 +24,7 @@ class Deformable_Conv_Block(nn.Module):
         self.offset_estimator = Dynamic_offset_estimator(input_channelsize=input_channels*2)
         self.offset_generator = ConvOffset2D(filters = input_channels*2)
 
-        self.conv1 = nn.Conv2d(64, out_channels=input_channels, kernel_size=3, padding=1, bias = False)
+        self.conv1 = nn.Conv2d(in_channels=input_channels, out_channels=input_channels, kernel_size=3, padding=1, bias = False)
 
     def forward(self,lr_features, hr_features):
       #  print("lr feature shape : {}".format(lr_features.shape))

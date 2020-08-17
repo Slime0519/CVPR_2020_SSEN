@@ -42,6 +42,26 @@ def lr_transform(image_size, rotate=0, upscale_factor = 4, mode = 'train'):
     return transform
 
 
+def testset_hr_transform():
+    transform = torch_transform.Compose([
+        torch_transform.ToPILImage(),
+        torch_transform.RandomCrop(192),
+        torch_transform.ToTensor()
+    ])
+    return transform
+
+def testset_lr_transform(image_size, upscale_factor = 4):
+
+    transform = torch_transform.Compose([
+        torch_transform.ToPILImage(),
+        torch_transform.Resize(image_size//upscale_factor, interpolation=Image.BICUBIC),
+        torch_transform.ToTensor()
+    ])
+
+    return transform
+
+
+
 class Dataset_Train(Dataset):
     def __init__(self, dirpath_input, dirpath_ref, upscale_factor = 4):
         super(Dataset_Train, self).__init__()
@@ -102,3 +122,51 @@ class Dataset_Vaild(Dataset):
 
     def __len__(self):
         return len(self.imagelist)
+
+class Dataset_Test(Dataset):
+    def __init__(self,dirpath, upscale_factor = 4, mode= "XH"):
+        self.upscale_factor = upscale_factor
+        self.imagelist = glob.glob(os.path.join(dirpath,"*.png"))
+        self.mode = mode
+
+        self.group_num = len(self.imagelist)//6
+        self.original_path = []
+        self.reference_path = []
+        for i in range(self.group_num):
+            self.original_path.append(self.imagelist[i*6])
+            self.reference_path.append(self.imagelist[i*6+1:(i+1)*6])
+
+        self.test_hr_transform = testset_hr_transform()
+        self.test_lr_transform = testset_lr_transform(image_size=192, upscale_factor=self.upscale_factor)
+
+    def __getitem__(self, index):
+        inputimage = Image.open(self.original_path[index]).convert('RGB')
+        inputimage = np.array(inputimage)
+
+        if inputimage.shape[0] % self.upscale_factor != 0:
+            inputimage = inputimage[:-(inputimage.shape[0]%self.upscale_factor),:]
+        if inputimage.shape[1] % self.upscale_factor != 0:
+            inputimage = inputimage[:,:-(inputimage.shape[1]%self.upscale_factor)]
+
+        if self.mode == "XH":
+            referenceimage = Image.open(self.reference_path[index][0]).convert('RGB')
+        elif self.mode == "H":
+            referenceimage = Image.open(self.reference_path[index][1]).convert('RGB')
+        elif self.mode == "M":
+            referenceimage = Image.open(self.reference_path[index][2]).convert('RGB')
+        elif self.mode == "L":
+            referenceimage = Image.open(self.reference_path[index][3]).convert('RGB')
+        elif self.mode == "XL":
+            referenceimage = Image.open(self.reference_path[index][4]).convert('RGB')
+
+        input_hr = self.test_hr_transform(inputimage)
+        input_lr = self.test_lr_transform(input_hr)
+        ref_hr = self.test_hr_transform(referenceimage)
+
+        return input_lr, input_hr, ref_hr
+
+    def __len__(self):
+        return self.group_num
+
+
+

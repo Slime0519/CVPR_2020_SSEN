@@ -107,9 +107,9 @@ if __name__ == "__main__":
             print("evaluation average PSNR : {}".format(PSNR_array_Vaild[epoch]))
         """
         if (epoch+1) % 100 == 0:
-            np.save(os.path.join(ResultSave_PATH,"Training_Average_PSNR.npy"),PSNR_array_Train)
-            np.save(os.path.join(ResultSave_PATH,"Training_Average_loss.npy"),loss_array_Train)
-            np.save(os.path.join(ResultSave_PATH,"Vaild_Average_PSNR.npy"),PSNR_array_Vaild)
+            np.save(os.path.join(ResultSave_PATH,"largerBaseline_Training_Average_PSNR.npy"),PSNR_array_Train)
+            np.save(os.path.join(ResultSave_PATH,"largerBaseline_Training_Average_loss.npy"),loss_array_Train)
+            np.save(os.path.join(ResultSave_PATH,"largerBaseline_Vaild_Average_PSNR.npy"),PSNR_array_Vaild)
 
-            torch.save(Model.state_dict(), os.path.join(TrainedMODEL_PATH,"Model_epoch{}.pth".format(epoch+1)))
+            torch.save(Model.state_dict(), os.path.join(TrainedMODEL_PATH,"larger_Model_epoch{}.pth".format(epoch+1)))
 

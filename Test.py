@@ -4,6 +4,8 @@ from Baseline import Baseline
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 import matplotlib.image as pltimage
+
+from utils import regularization_image, getPSNR
 import numpy as np
 import os
 import cv2
@@ -16,22 +18,6 @@ if torch.cuda.is_available():
 else:
     device = torch.device("cpu")
 
-
-def regularization_image(image):
-    min = np.min(image)
-    temp_image = image-min
-
-    max = np.max(temp_image)
-    temp_image = temp_image/max
-
-    return temp_image
-
-def getPSNR(image1, image2):
-    MSE = (image1-image2)**2
-    MSE = np.sum(MSE)
-
-    PSNR = 10*np.log10(1/MSE)
-    return PSNR
 
 
 if __name__ == "__main__":

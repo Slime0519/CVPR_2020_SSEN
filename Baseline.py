@@ -1,6 +1,11 @@
 import torch
 import torch.nn as nn
 from SSEN import SSEN
+from utils import showpatch
+import numpy as np
+import matplotlib.pyplot as plt
+import PIL.Image as Image
+import os
 import torchsummary
 
 
@@ -20,6 +25,7 @@ def make_downsampling_network(layernum = 2, in_channels = 3, out_channels = 64):
     print(layers)
     model = nn.Sequential(*layers)
     return model
+
 
 class Baseline(nn.Module):
     def __init__(self, num_channel = 64, mode = "RefSR"):
@@ -57,13 +63,17 @@ class Baseline(nn.Module):
 
         lr_feature_out = self.feature_extractor(input_lr)
         ref_feature_out = self.feature_extractor(ref_input)
+
         SSEN_out = self.SSEN_Network(lr_batch = lr_feature_out ,init_hr_batch = ref_feature_out)
         residual_input = torch.cat((lr_feature_out, SSEN_out), dim = 1)
-    #    print("residual input size : {}".format(residual_input.shape))
         residual_input_scaled = self.preprocessing_residual_block(residual_input)
         out = self.residual_blocks(residual_input_scaled)
 
-       # print("size : out {}  lrfeature {}".format(out.shape,lr_feature_out.shape))
+        if showmode:
+            showpatch(lr_feature_out,foldername="extracted_features_lr_image")
+            showpatch(ref_feature_out,foldername="extracted_features_ref_image")
+            showpatch(out, foldername="features_after_reconstruction_blocks")
+
         out = torch.add(out,lr_feature_out)
         out = self.upscaling_4x(out)
         out = self.outconv(out)

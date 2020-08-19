@@ -1,8 +1,9 @@
 import torch.nn as nn
 import torch
-
+import numpy as np
 from Dynamic_offset_estimator import Dynamic_offset_estimator
 from torch_deform_conv.layers import ConvOffset2D
+from utils import showpatch
 
 class SSEN(nn.Module):
     def __init__(self,in_channels):
@@ -11,10 +12,15 @@ class SSEN(nn.Module):
         self.deformblock2 = Deformable_Conv_Block(input_channels= in_channels)
         self.deformblock3 = Deformable_Conv_Block(input_channels=in_channels)
 
-    def forward(self,lr_batch, init_hr_batch):
+    def forward(self,lr_batch, init_hr_batch, showmode = False):
+
         hr_out1 = self.deformblock1(lr_batch, init_hr_batch)
         hr_out2 = self.deformblock2(lr_batch, hr_out1)
         hr_out3 = self.deformblock3(lr_batch, hr_out2)
+        if showmode:
+            showpatch(hr_out1, foldername="extracted_features_by_deformconv1")
+            showpatch(hr_out2, foldername="extracted_features_by_deformconv2")
+            showpatch(hr_out3, foldername="extracted_features_by_deformconv3")
 
         return hr_out3
 

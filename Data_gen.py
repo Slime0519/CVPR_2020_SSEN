@@ -139,6 +139,9 @@ class Dataset_Test(Dataset):
         self.test_hr_transform = testset_hr_transform()
         self.test_lr_transform = testset_lr_transform(image_size=192, upscale_factor=self.upscale_factor)
 
+       # print(self.group_num)
+       # print(self.imagelist)
+
     def __getitem__(self, index):
         inputimage = Image.open(self.original_path[index]).convert('RGB')
         inputimage = np.array(inputimage)
@@ -159,6 +162,7 @@ class Dataset_Test(Dataset):
         elif self.mode == "XL":
             referenceimage = Image.open(self.reference_path[index][4]).convert('RGB')
 
+        referenceimage = np.array(referenceimage)
         input_hr = self.test_hr_transform(inputimage)
         input_lr = self.test_lr_transform(input_hr)
         ref_hr = self.test_hr_transform(referenceimage)

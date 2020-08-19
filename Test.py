@@ -35,17 +35,17 @@ def getPSNR(image1, image2):
 
 
 if __name__ == "__main__":
-    testset_dirpath = "CUFED5"
+    testset_dirpath = "CUFED_SRNTT/CUFED5"
 
     model_dirpath = "Trained_model"
-    model_epoch = 300
+    model_epoch = 800
 
     testmodel = Baseline().to(device)
     Test_Dataset = Data_gen.Dataset_Test(dirpath=testset_dirpath,upscale_factor=4, mode = "XH")
     Test_Dataloader = DataLoader(dataset=Test_Dataset, shuffle=False, batch_size=1, num_workers=0)
 
     testmodel.load_state_dict(
-        torch.load(os.path.join(model_dirpath, "Generator", "generator_{}th_model.pth".format(model_epoch - 1))))
+        torch.load(os.path.join(model_dirpath,"Model_epoch{}.pth".format(model_epoch))))
     testmodel = testmodel.to(device)
     testmodel.eval()
 
@@ -70,14 +70,29 @@ if __name__ == "__main__":
         regularized_input_image = regularization_image(input_bicubic)
         regularized_input_image = (regularized_input_image * 255).astype(np.uint8)
 
-        # PNG Image 저장
-        PIL_Input_Image = Image.fromarray(regularized_input_image).convert('RGB')
-        # PIL_Input_Image.save("Result_image/bicubic/epoch{}_image{}.png".format(model_epoch,i))
-        PIL_Input_Image.save("Result_image/bicubic/epoch{}_image18.png".format(model_epoch))  # save large size image
+        regularized_output_image = np.transpose(regularized_output_image, (1, 2, 0))
+        target_image = np.transpose(target_image,(1,2,0))
+        target_image = (target_image*255).astype(np.uint8)
+      #  plt.imshow(regularized_input_image)
+      #  plt.show()
+       # plt.imshow(regularized_output_image)
+      #  plt.show()
+      #  plt.imshow(target_image)
+      #  plt.show()
 
-        PIL_output_Image = Image.fromarray(regularized_output_image).convert('RGB')
+        # PNG Image 저장
+        PIL_Input_Image = Image.fromarray(regularized_input_image)
+        #PIL_Input_Image.save("Result_image/bicubic/epoch{}_image{}.png".format(model_epoch,i))
+        PIL_Input_Image.save("Result_image/input/image{}.png".format(i))  # save large size image
+
+        PIL_output_Image = Image.fromarray(regularized_output_image)
         # PIL_output_Image.save("Result_image/srgan/epoch{}_image{}.png".format(model_epoch, i))
-        PIL_output_Image.save("Result_image/srgan/epoch{}_image18.png".format(model_epoch))
+        PIL_output_Image.save("Result_image/output/image{}.png".format(i))
+
+        PIL_target_Image = Image.fromarray(target_image)
+        # PIL_output_Image.save("Result_image/srgan/epoch{}_image{}.png".format(model_epoch, i))
+        PIL_target_Image.save("Result_image/target/image{}.png".format(i))
+
 
 
 

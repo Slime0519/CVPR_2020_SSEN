@@ -25,15 +25,12 @@ class Baseline(nn.Module):
     def __init__(self, num_channel = 64, mode = "RefSR"):
         super(Baseline, self).__init__()
         self.mode = mode
-        self.feature_extractor = make_residual_block(blocknum=5, input_channel=3, output_channel=64)
-
-        #referenced by EDVR paper implementation code
-        #https://github.com/xinntao/EDVR/blob/master/basicsr/models/archs/edvr_arch.py line 251
-        if mode == "RefSR":
-            self.downsampling_network = make_downsampling_network(layernum=2, in_channels=3, out_channels=64)
-            self.lrfeature_scaler = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=1, bias=False)
-            self.feature_extractor = make_residual_block(blocknum=5, input_channel=64, output_channel=64)
-
+        # referenced by EDVR paper implementation code
+        # https://github.com/xinntao/EDVR/blob/master/basicsr/models/archs/edvr_arch.py line 251
+        self.downsampling_network = make_downsampling_network(layernum=2, in_channels=3, out_channels=64)
+        self.lrfeature_scaler1 = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=1, bias=False)
+        self.lrfeature_scaler2 = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=1, bias=False)
+        self.feature_extractor = make_residual_block(blocknum=5, input_channel=64, output_channel=64)
 
        # self.conv1 = nn.Conv2d(in_channels=3,out_channels=num_channel, kernel_size=3, padding=1, bias=False)
 
@@ -53,12 +50,10 @@ class Baseline(nn.Module):
         self.outconv = nn.Conv2d(in_channels=num_channel, out_channels=3, kernel_size=3, padding=1, bias=False)
 
 
-    def forward(self,input_lr, ref_input):
-      #  out = self.conv1(x)
-        if self.mode == "RefSR":
-          #  print(ref_input.shape)
-            ref_input = self.downsampling_network(ref_input)
-            input_lr = self.lrfeature_scaler(input_lr)
+    def forward(self,input_lr, ref_input , showmode = False, dirpath = None):
+        ref_input = self.downsampling_network(ref_input)
+        input_lr = self.lrfeature_scaler1(input_lr)
+        input_lr = self.lrfeature_scaler2(input_lr)
 
         lr_feature_out = self.feature_extractor(input_lr)
         ref_feature_out = self.feature_extractor(ref_input)
@@ -89,16 +84,7 @@ class residual_block(nn.Module):
         out = torch.add(out,x)
 
         return out
-"""
-class Feature_extractor_in_SSEN(nn.Module):
-    def __init__(self, input_channel, output_channel):
-        super(Feature_extractor_in_SSEN, self).__init__()
-        #self.extraction_network =
 
-   # def forward(self,x):
-     #   out = self.extraction_network(x)
-     #  return out
-"""
 class L1_Charbonnier_loss(nn.Module):
     """L1 Charbonnierloss."""
     def __init__(self):

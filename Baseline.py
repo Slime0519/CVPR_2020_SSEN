@@ -43,7 +43,7 @@ class Baseline(nn.Module):
         self.SSEN_Network = SSEN(in_channels=num_channel)
 
         self.preprocessing_residual_block = nn.Conv2d(in_channels=128, out_channels=64, kernel_size=1, bias=False)
-        self.residual_blocks = make_residual_block(blocknum=32, input_channel=64, output_channel=64)
+        self.residual_blocks = make_residual_block(blocknum=16, input_channel=64, output_channel=64)
 
         self.upscaling_4x = nn.Sequential(
             nn.Conv2d(in_channels=num_channel, out_channels=4*num_channel, kernel_size=3, padding=1, bias = False),

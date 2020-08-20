@@ -39,7 +39,9 @@ if __name__ == "__main__":
         # if not i == 33:
         #    continue
         input, refimage = input.to(device), refimage.to(device)
-        output = testmodel(input,refimage)
+#        output = testmodel(input,refimage, showmode = True)
+        output = testmodel(input, refimage, showmode=False)
+
         output_image = np.array(output.cpu().detach())
         output_image = output_image.squeeze()
         regularized_output_image = regularization_image(output_image)
@@ -48,7 +50,16 @@ if __name__ == "__main__":
         target_image = np.array(target)
         target_image = np.squeeze(target_image)
         target_image = regularization_image(target_image)
+        target_image = (target_image * 255).astype(np.uint8)
+
+        ref_image = np.array(refimage.cpu().detach())
+        ref_image = ref_image.squeeze()
+        regularized_ref_image = regularization_image(ref_image)
+        regularized_ref_image = (ref_image * 255).astype(np.uint8)
+        regularized_ref_image = np.transpose(regularized_ref_image,(1,2,0))
+
         PSNR = getPSNR(regularized_output_image, target_image)
+
         print("PSNR : {}".format(PSNR))
         input_temp = np.array(input.cpu().detach())
         input_bicubic = cv2.resize(np.transpose(np.squeeze(input_temp), (1, 2, 0)), dsize=(0, 0), fx=4, fy=4,
@@ -58,25 +69,18 @@ if __name__ == "__main__":
 
         regularized_output_image = np.transpose(regularized_output_image, (1, 2, 0))
         target_image = np.transpose(target_image,(1,2,0))
-        target_image = (target_image*255).astype(np.uint8)
-      #  plt.imshow(regularized_input_image)
-      #  plt.show()
-       # plt.imshow(regularized_output_image)
-      #  plt.show()
-      #  plt.imshow(target_image)
-      #  plt.show()
 
         # PNG Image 저장
         PIL_Input_Image = Image.fromarray(regularized_input_image)
-        #PIL_Input_Image.save("Result_image/bicubic/epoch{}_image{}.png".format(model_epoch,i))
         PIL_Input_Image.save("Result_image/input/image{}.png".format(i))  # save large size image
 
         PIL_output_Image = Image.fromarray(regularized_output_image)
-        # PIL_output_Image.save("Result_image/srgan/epoch{}_image{}.png".format(model_epoch, i))
         PIL_output_Image.save("Result_image/output/image{}.png".format(i))
 
+        PIL_ref_Image = Image.fromarray(regularized_ref_image)
+        PIL_ref_Image.save("Result_image/reference/image{}.png".format(i))
+
         PIL_target_Image = Image.fromarray(target_image)
-        # PIL_output_Image.save("Result_image/srgan/epoch{}_image{}.png".format(model_epoch, i))
         PIL_target_Image.save("Result_image/target/image{}.png".format(i))
 
 

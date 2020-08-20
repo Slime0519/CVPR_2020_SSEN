@@ -14,9 +14,9 @@ class SSEN(nn.Module):
 
     def forward(self,lr_batch, init_hr_batch, showmode = False):
 
-        hr_out1 = self.deformblock1(lr_batch, init_hr_batch)
-        hr_out2 = self.deformblock2(lr_batch, hr_out1)
-        hr_out3 = self.deformblock3(lr_batch, hr_out2)
+        hr_out1 = self.deformblock1(lr_batch, init_hr_batch,showmode = showmode,num_block = 1)
+        hr_out2 = self.deformblock2(lr_batch, hr_out1, showmode = showmode, num_block = 2)
+        hr_out3 = self.deformblock3(lr_batch, hr_out2, showmode = showmode, num_block = 3)
         if showmode:
             showpatch(hr_out1, foldername="extracted_features_by_deformconv1")
             showpatch(hr_out2, foldername="extracted_features_by_deformconv2")
@@ -32,7 +32,7 @@ class Deformable_Conv_Block(nn.Module):
 
         self.conv1 = nn.Conv2d(in_channels=input_channels, out_channels=input_channels, kernel_size=3, padding=1, bias = False)
 
-    def forward(self,lr_features, hr_features):
+    def forward(self,lr_features, hr_features,showmode = False,num_block =None):
       #  print("lr feature shape : {}".format(lr_features.shape))
        # print("hr feature shape : {}".format(hr_features.shape))
         input_offset = torch.cat((lr_features,hr_features),dim=1)
@@ -41,6 +41,8 @@ class Deformable_Conv_Block(nn.Module):
 
        # print("offset size : {}".format(estimated_offset.shape))
         gend_offset = self.offset_generator(hr_features, estimated_offset)
+        if showmode:
+            showpatch(gend_offset,foldername="extracted_offset_deformconv{}".format(num_block))
        # print("generated offset size : {}".format(gend_offset.shape))
         output = self.conv1(gend_offset)
 

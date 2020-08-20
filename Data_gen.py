@@ -146,6 +146,11 @@ class Dataset_Test(Dataset):
         inputimage = Image.open(self.original_path[index]).convert('RGB')
         inputimage = np.array(inputimage)
 
+        if inputimage.shape[0]<192 or inputimage.shape[1]<192:
+            index = index-1
+            inputimage = Image.open(self.original_path[index]).convert('RGB')
+            inputimage = np.array(inputimage)
+
         if inputimage.shape[0] % self.upscale_factor != 0:
             inputimage = inputimage[:-(inputimage.shape[0]%self.upscale_factor),:]
         if inputimage.shape[1] % self.upscale_factor != 0:

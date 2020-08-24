@@ -33,7 +33,7 @@ class Baseline(nn.Module):
         # referenced by EDVR paper implementation code
         # https://github.com/xinntao/EDVR/blob/master/basicsr/models/archs/edvr_arch.py line 251
         self.downsampling_network = make_downsampling_network(layernum=2, in_channels=3, out_channels=64)
-        self.lrfeature_scaler = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=1, bias=False)
+       # self.lrfeature_scaler = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=1, bias=False)
      #   self.lrfeature_scaler2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=1, bias=False)
         self.feature_extractor = make_residual_block(blocknum=5, input_channel=64, output_channel=64)
 
@@ -57,8 +57,6 @@ class Baseline(nn.Module):
 
     def forward(self,input_lr, ref_input , showmode = False):
         ref_input = self.downsampling_network(ref_input)
-        input_lr = self.lrfeature_scaler(input_lr)
-       # input_lr = self.lrfeature_scaler2(input_lr)
 
         lr_feature_out = self.feature_extractor(input_lr)
         ref_feature_out = self.feature_extractor(ref_input)

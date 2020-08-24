@@ -48,8 +48,9 @@ if __name__ == "__main__":
     Train_Dataloader = DataLoader(dataset=Train_Dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=2, drop_last=True)
     Vaild_Dataloader = DataLoader(dataset=Vaild_Dataset, batch_size=1, shuffle=False, num_workers=0, drop_last=True)
 
-    #Model = Baseline()
-    Model = BigBaseline()
+    Model = Baseline()
+    Model = nn.DataParallel(Model)
+    #Model = BigBaseline()
     Model = Model.to(device)
     optimizer = optim.Adam(Model.parameters(), lr=lr, betas=(0.9, 0.999))
     cosine_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=TOTAL_EPOCHS, )

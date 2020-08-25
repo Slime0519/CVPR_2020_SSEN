@@ -19,6 +19,7 @@ parser.add_argument('--pre_resulted', type = str, default = None, help = "Data a
 parser.add_argument('--batch_size', type = int, default = 32, help = "Batch size")
 parser.add_argument('--learning_rate', type = float, default=1e-4, help ="learning rate")
 parser.add_argument('--gamma', type = float, default = 0.9, help = 'momentum of ADAM optimizer')
+parser.add_argument('--pretrained_epoch', type=int, default=0, help ='pretrained models epoch')
 
 if __name__ == "__main__":
     opt = parser.parse_args()
@@ -29,6 +30,7 @@ if __name__ == "__main__":
     BATCH_SIZE = opt.batch_size
     lr = opt.learning_rate
     gamma = opt.gamma
+    PRETRAINED_EPOCH = opt.pretrained_epoch
 
     TrainDIR_PATH = "CUFED_SRNTT/input/"
     RefDIR_PATH = "CUFED_SRNTT/ref/"
@@ -48,10 +50,11 @@ if __name__ == "__main__":
     Train_Dataloader = DataLoader(dataset=Train_Dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=2, drop_last=True)
     Vaild_Dataloader = DataLoader(dataset=Vaild_Dataset, batch_size=1, shuffle=False, num_workers=0, drop_last=True)
 
-    Model = Baseline()
+    #Model = Baseline()
+    Model = BigBaseline()
     Model = nn.DataParallel(Model)
-    #Model = BigBaseline()
     Model = Model.to(device)
+
     optimizer = optim.Adam(Model.parameters(), lr=lr, betas=(0.9, 0.999))
     cosine_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=TOTAL_EPOCHS, )
 
@@ -62,6 +65,17 @@ if __name__ == "__main__":
     PSNR_array_Vaild = np.zeros(TOTAL_EPOCHS)
 
     trainloader_len = len(Train_Dataloader)
+
+    if PRETRAINED_EPOCH>0:
+        Model.load_state_dict(
+              torch.load(os.path.join(TrainedMODEL_PATH,"larger_Model_epoch{}.pth".format(PRETRAINED_EPOCH))))
+
+        Train_PSNR = np.load(os.path.join(ResultSave_PATH, "largerBaseline_Training_Average_PSNR.npy"))
+        Train_loss = np.load(os.path.join(ResultSave_PATH, "largerBaseline_Training_Average_loss.npy"))
+
+        for i in len(Train_PSNR):
+            PSNR_array_Train[i] = Train_PSNR[i]
+            loss_array_Train[i] = Train_loss[i]
 
     for epoch in range(TOTAL_EPOCHS):
         Model.train()

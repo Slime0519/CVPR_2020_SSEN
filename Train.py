@@ -50,8 +50,8 @@ if __name__ == "__main__":
     Train_Dataloader = DataLoader(dataset=Train_Dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=2, drop_last=True)
     Vaild_Dataloader = DataLoader(dataset=Vaild_Dataset, batch_size=1, shuffle=False, num_workers=0, drop_last=True)
 
-    #Model = Baseline()
-    Model = BigBaseline()
+    Model = Baseline()
+    #Model = BigBaseline()
     Model = nn.DataParallel(Model)
     Model = Model.to(device)
 
@@ -73,7 +73,7 @@ if __name__ == "__main__":
         Train_PSNR = np.load(os.path.join(ResultSave_PATH, "largerBaseline_Training_Average_PSNR.npy"))
         Train_loss = np.load(os.path.join(ResultSave_PATH, "largerBaseline_Training_Average_loss.npy"))
 
-        for i in len(Train_PSNR):
+        for i in range(len(Train_PSNR)):
             PSNR_array_Train[i] = Train_PSNR[i]
             loss_array_Train[i] = Train_loss[i]
 

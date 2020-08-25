@@ -45,7 +45,7 @@ if __name__ == "__main__":
 
  #   testmodel.load_state_dict(
   #      torch.load(os.path.join(model_dirpath,"larger_Model_epoch{}.pth".format(model_epoch))))
-    testmodel = testmodel.to(device)
+    #testmodel = testmodel.to(device)
     testmodel.eval()
 
     for i, (input, target, refimage) in enumerate(Test_Dataloader):

@@ -30,8 +30,21 @@ if __name__ == "__main__":
     Test_Dataset = Data_gen.Dataset_Test(dirpath=testset_dirpath,upscale_factor=4, mode = "XH")
     Test_Dataloader = DataLoader(dataset=Test_Dataset, shuffle=False, batch_size=1, num_workers=0)
 
-    testmodel.load_state_dict(
-        torch.load(os.path.join(model_dirpath,"Model_epoch{}.pth".format(model_epoch))))
+    # original saved file with DataParallel
+    state_dict = torch.load(os.path.join(model_dirpath,"larger_Model_epoch{}.pth".format(model_epoch)))
+    # create new OrderedDict that does not contain `module.`
+    from collections import OrderedDict
+
+    new_state_dict = OrderedDict()
+    for k, v in state_dict.items():
+        name = k[7:]  # remove `module.`
+        new_state_dict[name] = v
+    # load params
+    testmodel.load_state_dict(new_state_dict)
+
+
+ #   testmodel.load_state_dict(
+  #      torch.load(os.path.join(model_dirpath,"larger_Model_epoch{}.pth".format(model_epoch))))
     testmodel = testmodel.to(device)
     testmodel.eval()
 

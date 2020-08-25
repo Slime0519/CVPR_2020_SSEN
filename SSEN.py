@@ -40,8 +40,8 @@ class Deformable_Conv_Block(nn.Module):
 
         if showmode:
             showpatch(estimated_offset,foldername="extracted_offset_deformconv{}".format(num_block))
-        print(estimated_offset.shape)
-        print(hr_features.shape)
+        #print(estimated_offset.shape)
+        #print(hr_features.shape)
         output = self.deformconv( x = hr_features, offset = estimated_offset)
 
         return output

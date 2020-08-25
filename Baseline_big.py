@@ -57,11 +57,9 @@ class BigBaseline(nn.Module):
 
     def forward(self,input_lr, ref_input):
       #  out = self.conv1(x)
-        if self.mode == "RefSR":
-          #  print(ref_input.shape)
-            ref_input = self.downsampling_network(ref_input)
-            input_lr = self.lrfeature_scaler1(input_lr)
-            input_lr = self.lrfeature_scaler2(input_lr)
+        ref_input = self.downsampling_network(ref_input)
+        input_lr = self.lrfeature_scaler1(input_lr)
+        input_lr = self.lrfeature_scaler2(input_lr)
 
         lr_feature_out = self.feature_extractor(input_lr)
         ref_feature_out = self.feature_extractor(ref_input)

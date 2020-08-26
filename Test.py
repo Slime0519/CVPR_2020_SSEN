@@ -1,6 +1,7 @@
 import torch
 import Data_gen
 from Baseline import Baseline
+from Baseline_big import BigBaseline
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 import matplotlib.image as pltimage
@@ -28,7 +29,8 @@ if __name__ == "__main__":
 
     image_savepath = "result_image"
 
-    testmodel = Baseline().to(device)
+#    testmodel = Baseline().to(device)
+    testmodel = BigBaseline().to(device)
     Test_Dataset = Data_gen.Dataset_Test(dirpath=testset_dirpath,upscale_factor=4, mode = "XH")
     Test_Dataloader = DataLoader(dataset=Test_Dataset, shuffle=False, batch_size=1, num_workers=0)
 
@@ -55,7 +57,7 @@ if __name__ == "__main__":
         #    continue
         input, refimage = input.to(device), refimage.to(device)
 #        output = testmodel(input,refimage, showmode = True)
-        output = testmodel(input, refimage, showmode=False)
+        output = testmodel(input, refimage)
 
         output_image = np.array(output.cpu().detach())
         output_image = output_image.squeeze()

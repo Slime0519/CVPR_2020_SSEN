@@ -39,9 +39,11 @@ def regularization_image(image):
 def getPSNR(image1, image2):
     shape = image1.shape[0]
 
-    MSE = (image1-image2)**2
-    MSE = np.sum(MSE)
-    MSE = MSE/(shape**2)
+#    MSE = (image1-image2)**2
+ #   MSE = np.sum(MSE)
+    
+   # MSE = MSE/(shape**2)
+    MSE = (np.square(image1-image2)).mean(axis = None)
 
     PSNR = 10*np.log10(255**2/MSE)
     return PSNR

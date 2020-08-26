@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from SSEN import SSEN
+from utils import showpatch
 import torchsummary
 
 
@@ -23,23 +24,16 @@ def make_downsampling_network(layernum = 2, in_channels = 3, out_channels = 64):
     return model
 
 class BigBaseline(nn.Module):
-    def __init__(self, num_channel = 256, mode = "RefSR"):
+    def __init__(self, num_channel = 256):
         super(BigBaseline, self).__init__()
-        self.mode = mode
         self.feature_extractor = make_residual_block(blocknum=5, input_channel=3, output_channel=64)
 
         #referenced by EDVR paper implementation code
         #https://github.com/xinntao/EDVR/blob/master/basicsr/models/archs/edvr_arch.py line 251
-        if mode == "RefSR":
-            self.downsampling_network = make_downsampling_network(layernum=2, in_channels=3, out_channels=256)
-            self.lrfeature_scaler1 = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=3, padding = 1, bias=False)
-            self.lrfeature_scaler2 = nn.Conv2d(in_channels=64, out_channels=256, kernel_size=3, padding = 1, bias= False)
-            self.feature_extractor = make_residual_block(blocknum=5, input_channel=256, output_channel=256)
-
-
-       # self.conv1 = nn.Conv2d(in_channels=3,out_channels=num_channel, kernel_size=3, padding=1, bias=False)
-
-        #self.feature_extractor = Feature_extractor_in_SSEN(input_channel=3, output_channel=num_channel)
+        self.downsampling_network = make_downsampling_network(layernum=2, in_channels=3, out_channels=256)
+        self.lrfeature_scaler1 = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=3, padding = 1, bias=False)
+        self.lrfeature_scaler2 = nn.Conv2d(in_channels=64, out_channels=256, kernel_size=3, padding = 1, bias= False)
+        self.feature_extractor = make_residual_block(blocknum=5, input_channel=256, output_channel=256)
         self.SSEN_Network = SSEN(in_channels=num_channel)
 
         self.preprocessing_residual_block = nn.Conv2d(in_channels=512, out_channels=256, kernel_size=1, bias=False)
@@ -55,22 +49,25 @@ class BigBaseline(nn.Module):
         self.outconv = nn.Conv2d(in_channels=num_channel, out_channels=3, kernel_size=3, padding=1, bias=False)
 
 
-    def forward(self,input_lr, ref_input):
-      #  out = self.conv1(x)
+    def forward(self,input_lr, ref_input, showmode = False):
+
         ref_input = self.downsampling_network(ref_input)
         input_lr = self.lrfeature_scaler1(input_lr)
         input_lr = self.lrfeature_scaler2(input_lr)
 
         lr_feature_out = self.feature_extractor(input_lr)
         ref_feature_out = self.feature_extractor(ref_input)
-        SSEN_out = self.SSEN_Network(lr_batch = lr_feature_out ,init_hr_batch = ref_feature_out)
+        SSEN_out = self.SSEN_Network(lr_batch = lr_feature_out ,init_hr_batch = ref_feature_out,showmode = showmode)
         residual_input = torch.cat((lr_feature_out, SSEN_out), dim = 1)
-    #    print("residual input size : {}".format(residual_input.shape))
         residual_input_scaled = self.preprocessing_residual_block(residual_input)
         out = self.residual_blocks(residual_input_scaled)
-
-       # print("size : out {}  lrfeature {}".format(out.shape,lr_feature_out.shape))
         out = torch.add(out,lr_feature_out)
+
+        if showmode:
+            showpatch(lr_feature_out, foldername="extracted_features_lr_image")
+            showpatch(ref_feature_out, foldername="extracted_features_ref_image")
+            showpatch(out, foldername="features_after_reconstruction_blocks")
+
         out = self.upscaling_4x(out)
         out = self.outconv(out)
         return out
@@ -90,16 +87,7 @@ class residual_block(nn.Module):
         out = torch.add(out,x)
 
         return out
-"""
-class Feature_extractor_in_SSEN(nn.Module):
-    def __init__(self, input_channel, output_channel):
-        super(Feature_extractor_in_SSEN, self).__init__()
-        #self.extraction_network =
 
-   # def forward(self,x):
-     #   out = self.extraction_network(x)
-     #  return out
-"""
 class L1_Charbonnier_loss(nn.Module):
     """L1 Charbonnierloss."""
     def __init__(self):

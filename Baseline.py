@@ -65,13 +65,13 @@ class Baseline(nn.Module):
         residual_input = torch.cat((lr_feature_out, SSEN_out), dim = 1)
         residual_input_scaled = self.preprocessing_residual_block(residual_input)
         out = self.residual_blocks(residual_input_scaled)
+        out = torch.add(out,lr_feature_out)
 
         if showmode:
             showpatch(lr_feature_out,foldername="extracted_features_lr_image")
             showpatch(ref_feature_out,foldername="extracted_features_ref_image")
             showpatch(out, foldername="features_after_reconstruction_blocks")
 
-        out = torch.add(out,lr_feature_out)
         out = self.upscaling_4x(out)
         out = self.outconv(out)
         return out

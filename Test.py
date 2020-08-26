@@ -24,14 +24,16 @@ if __name__ == "__main__":
     testset_dirpath = "CUFED_SRNTT/CUFED5"
 
     model_dirpath = "Trained_model"
-    model_epoch = 800
+    model_epoch = 200
+
+    image_savepath = "result_image"
 
     testmodel = Baseline().to(device)
     Test_Dataset = Data_gen.Dataset_Test(dirpath=testset_dirpath,upscale_factor=4, mode = "XH")
     Test_Dataloader = DataLoader(dataset=Test_Dataset, shuffle=False, batch_size=1, num_workers=0)
 
     # original saved file with DataParallel
-    state_dict = torch.load(os.path.join(model_dirpath,"larger_Model_epoch{}.pth".format(model_epoch)))
+    state_dict = torch.load(os.path.join(model_dirpath,"Larger_Model_epoch{}.pth".format(model_epoch)))
     # create new OrderedDict that does not contain `module.`
     from collections import OrderedDict
 
@@ -85,16 +87,16 @@ if __name__ == "__main__":
 
         # PNG Image 저장
         PIL_Input_Image = Image.fromarray(regularized_input_image)
-        PIL_Input_Image.save("Result_image/input/image{}.png".format(i))  # save large size image
+        PIL_Input_Image.save("Result_image/Larger_model/input/image{}.png".format(i))  # save large size image
 
         PIL_output_Image = Image.fromarray(regularized_output_image)
-        PIL_output_Image.save("Result_image/output/image{}.png".format(i))
+        PIL_output_Image.save("Result_image/Larger_model/output/image{}.png".format(i))
 
         PIL_ref_Image = Image.fromarray(regularized_ref_image)
-        PIL_ref_Image.save("Result_image/reference/image{}.png".format(i))
+        PIL_ref_Image.save("Result_image/Larger_model/reference/image{}.png".format(i))
 
         PIL_target_Image = Image.fromarray(target_image)
-        PIL_target_Image.save("Result_image/target/image{}.png".format(i))
+        PIL_target_Image.save("Result_image/Larger_model/target/image{}.png".format(i))
 
 
 

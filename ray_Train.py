@@ -78,11 +78,11 @@ if __name__ == "__main__":
                            optimizer_creator=optimizer_creator,
                            loss_creator=loss_creator,
                            scheduler_creator=scheduler_creator,
-                           num_workers = 4,
                            use_gpu = True,
                            config = {"model_category":"small", "lr" : lr , "betas":(0.9,0.999),"num_workers":4, "BATCH_SIZE":BATCH_SIZE},
                            use_tqdm=True,
                            use_fp16=True,
+                           scheduler_step_freq='epoch'
                            )
 
     pbar = trange(PRETRAINED_EPOCH,TOTAL_EPOCHS, unit="epoch")

@@ -9,7 +9,6 @@ from PIL import Image
 import numpy as np
 import os
 
-
 def hr_transform(rotate=0, mode = 'train'):
     transform = torch_transform.Compose([
         torch_transform.ToPILImage(),
@@ -138,7 +137,8 @@ class Dataset_Test(Dataset):
             self.original_path.append(self.imagelist[i*6])
             self.reference_path.append(self.imagelist[i*6+1:(i+1)*6])
 
-
+        self.test_hr_transform = testset_hr_transform()
+        self.test_lr_transform = testset_lr_transform(image_size=192, upscale_factor=self.upscale_factor)
 
        # print(self.group_num)
        # print(self.imagelist)
@@ -191,4 +191,6 @@ class Dataset_Test(Dataset):
 
     def __len__(self):
         return self.group_num
+
+
 

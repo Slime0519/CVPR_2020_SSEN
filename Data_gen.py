@@ -45,7 +45,7 @@ def lr_transform(image_size, rotate=0, upscale_factor = 4, mode = 'train'):
 def testset_hr_transform():
     transform = torch_transform.Compose([
         torch_transform.ToPILImage(),
-        torch_transform.RandomCrop(192),
+ #       torch_transform.RandomCrop(192),
         torch_transform.ToTensor()
     ])
     return transform

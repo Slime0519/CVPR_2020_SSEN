@@ -131,7 +131,7 @@ if __name__ == "__main__":
         break
     """
     offset1= np.load("Network_patches/offset/offset_deformconv1.npy")
-    offset1 =
+ #   offset1 =
     print(offset1)
 
 

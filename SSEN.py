@@ -34,8 +34,8 @@ class Deformable_Conv_Block(nn.Module):
         self.deformconv = DeformConv2d(in_channels=input_channels,out_channels=input_channels, kernel_size=3, padding = 1,  bias=False)
 
     def forward(self,lr_features, hr_features, showmode = False, num_block =None):
-        print(lr_features.shape)
-        print(hr_features.shape)
+#        print(lr_features.shape)
+ #       print(hr_features.shape)
         input_offset = torch.cat((lr_features,hr_features),dim=1)
         
         estimated_offset = self.offset_estimator(input_offset)

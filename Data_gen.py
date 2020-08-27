@@ -55,7 +55,7 @@ def testset_lr_transform(image_size, upscale_factor = 4):
 
     transform = torch_transform.Compose([
         torch_transform.ToPILImage(),
-        torch_transform.Resize(image_size//upscale_factor, interpolation=Image.BICUBIC),
+        torch_transform.Resize((image_size[0]//upscale_factor,image_size[1]//upscale_factor), interpolation=Image.BICUBIC),
         torch_transform.ToTensor()
     ])
 
@@ -137,8 +137,8 @@ class Dataset_Test(Dataset):
             self.original_path.append(self.imagelist[i*6])
             self.reference_path.append(self.imagelist[i*6+1:(i+1)*6])
 
-        self.test_hr_transform = testset_hr_transform()
-        self.test_lr_transform = testset_lr_transform(image_size=192, upscale_factor=self.upscale_factor)
+ #       self.test_hr_transform = testset_hr_transform()
+#        self.test_lr_transform = testset_lr_transform(image_size=192, upscale_factor=self.upscale_factor)
 
        # print(self.group_num)
        # print(self.imagelist)
@@ -152,11 +152,6 @@ class Dataset_Test(Dataset):
             inputimage = Image.open(self.original_path[index]).convert('RGB')
             inputimage = np.array(inputimage)
 
-        if inputimage.shape[0] % self.upscale_factor != 0:
-            inputimage = inputimage[:-(inputimage.shape[0]%self.upscale_factor),:]
-        if inputimage.shape[1] % self.upscale_factor != 0:
-            inputimage = inputimage[:,:-(inputimage.shape[1]%self.upscale_factor)]
-
         if self.mode == "XH":
             referenceimage = Image.open(self.reference_path[index][0]).convert('RGB')
         elif self.mode == "H":
@@ -169,6 +164,7 @@ class Dataset_Test(Dataset):
             referenceimage = Image.open(self.reference_path[index][4]).convert('RGB')
 
         referenceimage = np.array(referenceimage)
+        
 
         if referenceimage.shape[0]> inputimage.shape[0]:
             height = inputimage.shape[0]
@@ -180,12 +176,27 @@ class Dataset_Test(Dataset):
         else:
             width = referenceimage.shape[1]
 
+#        if inputimage.shape[0] % (self.upscale_factor*8) != 0:
+ #           inputimage = inputimage[:-(inputimage.shape[0]%(self.upscale_factor*8)),:]
+  #      if inputimage.shape[1] % (self.upscale_factor*8) != 0:
+   #         inputimage = inputimage[:,:-(inputimage.shape[1]%(self.upscale_factor*8))]
+
+        if height %(self.upscale_factor*8)!=0:
+            height = self.upscale_factor*8*(height//(self.upscale_factor*8))
+        if width %(self.upscale_factor*8)!=0:
+            width = self.upscale_factor*8*(width//(self.upscale_factor*8))
+
         self.test_hr_transform = testset_hr_transform(imagesize=(height,width))
         self.test_lr_transform = testset_lr_transform(image_size=(height,width), upscale_factor=self.upscale_factor)
 
         input_hr = self.test_hr_transform(inputimage)
         input_lr = self.test_lr_transform(input_hr)
         ref_hr = self.test_hr_transform(referenceimage)
+        
+        
+#        print(input_hr.shape)
+#        print(ref_hr.shape)
+ #       print(input_lr.shape)
 
         return input_lr, input_hr, ref_hr
 

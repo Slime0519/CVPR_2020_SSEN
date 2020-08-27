@@ -1,12 +1,14 @@
 import torch
 import torch.nn as nn
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
 import glob
 import torchvision.transforms as torch_transform
+import matplotlib.pyplot as plt
 
 from PIL import Image
 import numpy as np
 import os
+
 
 def hr_transform(rotate=0, mode = 'train'):
     transform = torch_transform.Compose([
@@ -42,10 +44,10 @@ def lr_transform(image_size, rotate=0, upscale_factor = 4, mode = 'train'):
     return transform
 
 
-def testset_hr_transform():
+def testset_hr_transform(imagesize = (192,192)):
     transform = torch_transform.Compose([
         torch_transform.ToPILImage(),
-        torch_transform.RandomCrop(192),
+        torch_transform.RandomCrop(imagesize),
         torch_transform.ToTensor()
     ])
     return transform
@@ -136,8 +138,7 @@ class Dataset_Test(Dataset):
             self.original_path.append(self.imagelist[i*6])
             self.reference_path.append(self.imagelist[i*6+1:(i+1)*6])
 
-        self.test_hr_transform = testset_hr_transform()
-        self.test_lr_transform = testset_lr_transform(image_size=192, upscale_factor=self.upscale_factor)
+
 
        # print(self.group_num)
        # print(self.imagelist)
@@ -168,6 +169,20 @@ class Dataset_Test(Dataset):
             referenceimage = Image.open(self.reference_path[index][4]).convert('RGB')
 
         referenceimage = np.array(referenceimage)
+
+        if referenceimage.shape[0]> inputimage.shape[0]:
+            height = inputimage.shape[0]
+        else:
+            height = referenceimage.shape[0]
+
+        if referenceimage.shape[1] > inputimage.shape[1]:
+            width = inputimage.shape[1]
+        else:
+            width = referenceimage.shape[1]
+
+        self.test_hr_transform = testset_hr_transform(imagesize=(height,width))
+        self.test_lr_transform = testset_lr_transform(image_size=(height,width), upscale_factor=self.upscale_factor)
+
         input_hr = self.test_hr_transform(inputimage)
         input_lr = self.test_lr_transform(input_hr)
         ref_hr = self.test_hr_transform(referenceimage)
@@ -176,6 +191,4 @@ class Dataset_Test(Dataset):
 
     def __len__(self):
         return self.group_num
-
-
 

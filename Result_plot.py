@@ -16,6 +16,7 @@ def plot_chart(array, title, xlabel, ylabel, save = False):
     y_max += y_max//5 #plus margin about y axis
 
     x = range(length)
+   # x = range(1000)
     y = range(int(y_max))
 
     plt.plot(x,array)
@@ -29,12 +30,12 @@ def plot_chart(array, title, xlabel, ylabel, save = False):
 
 
 if __name__ == "__main__":
-    Train_PSNR = np.load(os.path.join(ResultSave_PATH,"largerBaseline_Training_Average_PSNR.npy"))
-    Train_loss = np.load(os.path.join(ResultSave_PATH,"largerBaseline_Training_Average_loss.npy"))
+    Train_PSNR = np.load(os.path.join(ResultSave_PATH,"LargerBaseline_Training_Average_PSNR.npy"))
+    Train_loss = np.load(os.path.join(ResultSave_PATH,"LargerBaseline_Training_Average_loss.npy"))
    # Eval_Average_PSNR = np.load(os.path.join(ResultSave_PATH,"Vaild_Average_PSNR.npy"))
 
-    plot_chart(Train_PSNR,"Average PSNR in Training step","epochs","PSNR",save = False)
-    plot_chart(Train_loss, "Average loss in Training step","epochs", "loss",save=False)
+    plot_chart(Train_PSNR[:400],"Average PSNR in Training step","epochs","PSNR",save = False)
+    plot_chart(Train_loss[:400], "Average loss in Training step","epochs", "loss",save=False)
   #  plot_chart(Eval_Average_PSNR,"Average PSNR in evaluation step","epochs","PSNR",save=False)
 
 

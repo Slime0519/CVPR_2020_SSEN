@@ -29,6 +29,28 @@ def showpatch(imagepatch, foldername=None, istensor = True):
             plt.imshow(image, 'gray')
             plt.savefig(os.path.join(folderpath,"image{}.png".format(channel)))
 
+
+def saveoffset(offsetbatch, foldername=None):
+    offsetbatch = np.array(offsetbatch.detach())
+    offsetbatch = np.transpose(offsetbatch, (0, 2, 3, 1))
+
+    sizetemp = offsetbatch.shape[:-1]
+    offset_coord = np.zeros((*sizetemp, int(offsetbatch.shape[-1] / 2), 2), dtype=np.float32)
+    """
+    for y in range(offset_coord.shape[1]):
+        for x in range(offset_coord.shape[2]):
+            for i in range(offset_coord.shape[3]):
+                coordtuple = offsetbatch[:,y,x,i*2:(i+1)*2]
+                offset_coord[:,y,x,i] = coordtuple
+    """
+    for i in range(offset_coord.shape[3]):
+        coordtuple = offsetbatch[:, :, :, i * 2:(i + 1) * 2]
+        offset_coord[:, :, :, i] = coordtuple
+
+    for i in range(offsetbatch.shape[0]):
+        np.save(os.path.join(foldername, "offset_{}.npy".format(i)), offsetbatch[i])
+
+
 def regularization_image(image):
     min = np.min(image)
     temp_image = image-min
@@ -111,3 +133,12 @@ if __name__ == "__main__":
     offset1= np.load("Network_patches/offset/offset_deformconv1.npy")
     offset1 =
     print(offset1)
+
+
+    array1 = torch.zeros([2, 18, 40, 40], dtype=torch.float32)
+    for i in range(9):
+        array1[0, 2 * i:2 * (i + 1), :, :] = i
+    for i in range(9):
+        array1[1, 2 * i:2 * (i + 1), :, :] = 8 - i
+    # print(array1[:,:,0,0])
+    saveoffset(array1)

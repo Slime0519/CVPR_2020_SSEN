@@ -23,12 +23,14 @@ else:
 
 parser = argparse.ArgumentParser(description="RefSR Network with SSEN Training module")
 parser.add_argument('--model_size', type = str, default="normal", help = "select model size")
+parser.add_argument('--model_epoch', type = int, default = 700 , help = "pretrained model's epoch")
 
 if __name__ == "__main__":
 
     opt = parser.parse_args()
 
     Modelsize = opt.model_size
+    model_epoch = opt.model_epoch
 
     if Modelsize == "normal":
         prefix_resultname = "normalModel"
@@ -40,7 +42,6 @@ if __name__ == "__main__":
     testset_dirpath = "CUFED_SRNTT/CUFED5"
 
     model_dirpath = os.path.join("Trained_model",prefix_resultname)
-    model_epoch = 400
 
     image_savepath = "result_image"
 

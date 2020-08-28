@@ -7,6 +7,7 @@ from torch.utils.data import DataLoader
 from Data_gen import Dataset_Vaild, Dataset_Train
 from Baseline import Baseline, L1_Charbonnier_loss
 from Baseline_big import BigBaseline
+from Baseline_small import Baseline_small
 
 import argparse
 import numpy as np
@@ -20,6 +21,7 @@ parser.add_argument('--batch_size', type = int, default = 32, help = "Batch size
 parser.add_argument('--learning_rate', type = float, default=1e-4, help ="learning rate")
 parser.add_argument('--gamma', type = float, default = 0.9, help = 'momentum of ADAM optimizer')
 parser.add_argument('--pretrained_epoch', type=int, default=0, help ='pretrained models epoch')
+parser.add_argument('--model_size', type = str, default="normal", help = 'select model size')
 
 if __name__ == "__main__":
     opt = parser.parse_args()
@@ -31,6 +33,7 @@ if __name__ == "__main__":
     lr = opt.learning_rate
     gamma = opt.gamma
     PRETRAINED_EPOCH = opt.pretrained_epoch
+    Modelsize = opt.model_size
 
     TrainDIR_PATH = "CUFED_SRNTT/input/"
     RefDIR_PATH = "CUFED_SRNTT/ref/"
@@ -44,14 +47,33 @@ if __name__ == "__main__":
     else:
         device = torch.device('cpu')
 
+
+    if Modelsize == "normal":
+        prefix_resultname = "normalModel"
+    elif Modelsize == "big":
+        prefix_resultname = "bigModel"
+    else:
+        prefix_resultname = "smallModel"
+
+    TrainedMODEL_PATH = os.path.join(TrainedMODEL_PATH,prefix_resultname)
+
     Train_Dataset = Dataset_Train(dirpath_input=TrainDIR_PATH, dirpath_ref=RefDIR_PATH, upscale_factor=4)
     Vaild_Dataset = Dataset_Vaild(dirpath=VaildDIR_PATH, upscale_factor=4)
 
     Train_Dataloader = DataLoader(dataset=Train_Dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=2, drop_last=True)
     Vaild_Dataloader = DataLoader(dataset=Vaild_Dataset, batch_size=1, shuffle=False, num_workers=0, drop_last=True)
 
-    Model = Baseline()
-    #Model = BigBaseline()
+    if Modelsize == "normal":
+        print("load original baseline module")
+        Model = Baseline()
+    elif Modelsize == "big":
+        print("load big baseline module")
+        Model = BigBaseline()
+    else :
+        print("load small baseline module")
+        Model = Baseline_small()
+
+
     Model = nn.DataParallel(Model)
     Model = Model.to(device)
 
@@ -68,10 +90,10 @@ if __name__ == "__main__":
 
     if PRETRAINED_EPOCH>0:
         Model.load_state_dict(
-              torch.load(os.path.join(TrainedMODEL_PATH,"larger_Model_epoch{}.pth".format(PRETRAINED_EPOCH))))
+              torch.load(os.path.join(TrainedMODEL_PATH,prefix_resultname+"_epoch{}.pth".format(PRETRAINED_EPOCH))))
 
-        Train_PSNR = np.load(os.path.join(ResultSave_PATH, "largerBaseline_Training_Average_PSNR.npy"))
-        Train_loss = np.load(os.path.join(ResultSave_PATH, "largerBaseline_Training_Average_loss.npy"))
+        Train_PSNR = np.load(os.path.join(ResultSave_PATH, prefix_resultname+"_Training_Average_PSNR.npy"))
+        Train_loss = np.load(os.path.join(ResultSave_PATH, prefix_resultname+"largerBaseline_Training_Average_loss.npy"))
 
         for i in range(len(Train_PSNR)):
             PSNR_array_Train[i] = Train_PSNR[i]
@@ -122,9 +144,9 @@ if __name__ == "__main__":
             print("evaluation average PSNR : {}".format(PSNR_array_Vaild[epoch]))
         """
         if (epoch+1) % 100 == 0:
-            np.save(os.path.join(ResultSave_PATH,"largerBaseline_Training_Average_PSNR.npy"),PSNR_array_Train)
-            np.save(os.path.join(ResultSave_PATH,"largerBaseline_Training_Average_loss.npy"),loss_array_Train)
-            np.save(os.path.join(ResultSave_PATH,"largerBaseline_Vaild_Average_PSNR.npy"),PSNR_array_Vaild)
+            np.save(os.path.join(ResultSave_PATH,prefix_resultname+"_Training_Average_PSNR.npy"),PSNR_array_Train)
+            np.save(os.path.join(ResultSave_PATH,prefix_resultname+"_Training_Average_loss.npy"),loss_array_Train)
+            np.save(os.path.join(ResultSave_PATH,prefix_resultname+"_Vaild_Average_PSNR.npy"),PSNR_array_Vaild)
 
-            torch.save(Model.state_dict(), os.path.join(TrainedMODEL_PATH,"larger_Model_epoch{}.pth".format(epoch+1)))
+            torch.save(Model.state_dict(), os.path.join(TrainedMODEL_PATH,prefix_resultname+"_epoch{}.pth".format(epoch+1)))
 

@@ -7,11 +7,11 @@ from mmcv.ops.deform_conv import DeformConv2d
 from utils import showpatch, saveoffset
 
 class SSEN(nn.Module):
-    def __init__(self,in_channels):
+    def __init__(self,in_channels,mode = "normal"):
         super(SSEN, self).__init__()
-        self.deformblock1 = Deformable_Conv_Block(input_channels= in_channels)
-        self.deformblock2 = Deformable_Conv_Block(input_channels= in_channels)
-        self.deformblock3 = Deformable_Conv_Block(input_channels=in_channels)
+        self.deformblock1 = Deformable_Conv_Block(input_channels= in_channels,mode = mode)
+        self.deformblock2 = Deformable_Conv_Block(input_channels= in_channels, mode = mode)
+        self.deformblock3 = Deformable_Conv_Block(input_channels=in_channels, mode = mode)
 
     def forward(self,lr_batch, init_hr_batch, showmode = False):
 
@@ -27,15 +27,17 @@ class SSEN(nn.Module):
         return hr_out3
 
 class Deformable_Conv_Block(nn.Module):
-    def __init__(self,input_channels):
+    def __init__(self,input_channels,mode):
         super(Deformable_Conv_Block, self).__init__()
         self.offset_estimator = Dynamic_offset_estimator(input_channelsize=input_channels*2)
-        self.offset_conv = nn.Conv2d(in_channels=input_channels*2, out_channels=1*2*9,kernel_size =3 ,padding=1,bias = False)
+        if mode == 'small':
+            self.offset_conv = nn.Conv2d(in_channels=input_channels*2, out_channels=1*2*9,kernel_size =1 ,padding=0,bias = False)
+        else :
+            self.offset_conv = nn.Conv2d(in_channels=input_channels * 2, out_channels=1 * 2 * 9, kernel_size=3, padding=1, bias=False)
+
         self.deformconv = DeformConv2d(in_channels=input_channels,out_channels=input_channels, kernel_size=3, padding = 1,  bias=False)
 
     def forward(self,lr_features, hr_features, showmode = False, num_block =None):
-#        print(lr_features.shape)
- #       print(hr_features.shape)
         input_offset = torch.cat((lr_features,hr_features),dim=1)
         
         estimated_offset = self.offset_estimator(input_offset)
@@ -43,9 +45,7 @@ class Deformable_Conv_Block(nn.Module):
 
         if showmode:
             #showpatch(estimated_offset,foldername="extracted_offset_deformconv{}".format(num_block))
-            saveoffset(estimated_offset,foldername="resultoffset")
-        #print(estimated_offset.shape)
-        #print(hr_features.shape)
+            saveoffset(estimated_offset,foldername="resultoffset_deformconv{}".format(num_block))
         output = self.deformconv( x = hr_features, offset = estimated_offset)
 
         return output

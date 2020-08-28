@@ -30,8 +30,8 @@ def plot_chart(array, title, xlabel, ylabel, save = False):
 
 
 if __name__ == "__main__":
-    Train_PSNR = np.load(os.path.join(ResultSave_PATH,"LargerBaseline_Training_Average_PSNR.npy"))
-    Train_loss = np.load(os.path.join(ResultSave_PATH,"LargerBaseline_Training_Average_loss.npy"))
+    Train_PSNR = np.load(os.path.join(ResultSave_PATH,"largerBaseline_Training_Average_PSNR.npy"))
+    Train_loss = np.load(os.path.join(ResultSave_PATH,"largerBaseline_Training_Average_loss.npy"))
    # Eval_Average_PSNR = np.load(os.path.join(ResultSave_PATH,"Vaild_Average_PSNR.npy"))
 
     plot_chart(Train_PSNR[:400],"Average PSNR in Training step","epochs","PSNR",save = False)

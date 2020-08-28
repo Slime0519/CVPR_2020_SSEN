@@ -137,12 +137,6 @@ class Dataset_Test(Dataset):
             self.original_path.append(self.imagelist[i*6])
             self.reference_path.append(self.imagelist[i*6+1:(i+1)*6])
 
- #       self.test_hr_transform = testset_hr_transform()
-#        self.test_lr_transform = testset_lr_transform(image_size=192, upscale_factor=self.upscale_factor)
-
-       # print(self.group_num)
-       # print(self.imagelist)
-
     def __getitem__(self, index):
         inputimage = Image.open(self.original_path[index]).convert('RGB')
         inputimage = np.array(inputimage)
@@ -176,11 +170,6 @@ class Dataset_Test(Dataset):
         else:
             width = referenceimage.shape[1]
 
-#        if inputimage.shape[0] % (self.upscale_factor*8) != 0:
- #           inputimage = inputimage[:-(inputimage.shape[0]%(self.upscale_factor*8)),:]
-  #      if inputimage.shape[1] % (self.upscale_factor*8) != 0:
-   #         inputimage = inputimage[:,:-(inputimage.shape[1]%(self.upscale_factor*8))]
-
         if height %(self.upscale_factor*8)!=0:
             height = self.upscale_factor*8*(height//(self.upscale_factor*8))
         if width %(self.upscale_factor*8)!=0:
@@ -192,11 +181,6 @@ class Dataset_Test(Dataset):
         input_hr = self.test_hr_transform(inputimage)
         input_lr = self.test_lr_transform(input_hr)
         ref_hr = self.test_hr_transform(referenceimage)
-        
-        
-#        print(input_hr.shape)
-#        print(ref_hr.shape)
- #       print(input_lr.shape)
 
         return input_lr, input_hr, ref_hr
 

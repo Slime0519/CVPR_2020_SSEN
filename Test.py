@@ -60,13 +60,13 @@ if __name__ == "__main__":
 
     if Modelsize == "normal":
         print("load original baseline module")
-        Model = Baseline()
+        testmodel = Baseline()
     elif Modelsize == "big":
         print("load big baseline module")
-        Model = BigBaseline()
+        testmodel = BigBaseline()
     else :
         print("load small baseline module")
-        Model = Baseline_small()
+        tsetmodel = Baseline_small()
 
     Test_Dataset = Data_gen.Dataset_Test(dirpath=testset_dirpath,upscale_factor=4, mode = "XH")
     Test_Dataloader = DataLoader(dataset=Test_Dataset, shuffle=False, batch_size=1, num_workers=0)

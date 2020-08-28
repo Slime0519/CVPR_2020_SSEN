@@ -6,6 +6,7 @@ from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 import matplotlib.image as pltimage
 import argparse
+from Baseline_small import Baseline_small
 
 from utils import regularization_image, getPSNR
 import numpy as np
@@ -55,8 +56,17 @@ if __name__ == "__main__":
     if not os.path.isdir(os.path.join("Result_image",prefix_resultname,"target")):
         os.mkdir(os.path.join("Result_image",prefix_resultname,"target"))
 
-    testmodel = Baseline().to(device)
-#    testmodel = BigBaseline().to(device)
+
+    if Modelsize == "normal":
+        print("load original baseline module")
+        Model = Baseline()
+    elif Modelsize == "big":
+        print("load big baseline module")
+        Model = BigBaseline()
+    else :
+        print("load small baseline module")
+        Model = Baseline_small()
+
     Test_Dataset = Data_gen.Dataset_Test(dirpath=testset_dirpath,upscale_factor=4, mode = "XH")
     Test_Dataloader = DataLoader(dataset=Test_Dataset, shuffle=False, batch_size=1, num_workers=0)
 

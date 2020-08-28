@@ -66,8 +66,9 @@ if __name__ == "__main__":
         testmodel = BigBaseline()
     else :
         print("load small baseline module")
-        tsetmodel = Baseline_small()
-
+        testmodel = Baseline_small()
+    
+    testmodel.to(device)
     Test_Dataset = Data_gen.Dataset_Test(dirpath=testset_dirpath,upscale_factor=4, mode = "XH")
     Test_Dataloader = DataLoader(dataset=Test_Dataset, shuffle=False, batch_size=1, num_workers=0)
 
@@ -100,19 +101,16 @@ if __name__ == "__main__":
         output_image = np.array(output.cpu().detach())
         output_image = output_image.squeeze()
         regularized_output_image = regularization_image(output_image)
-        regularized_output_image = (regularized_output_image * 255).astype(np.uint8)
-
+        
         target_image = np.array(target)
         target_image = np.squeeze(target_image)
         target_image = regularization_image(target_image)
-        target_image = (target_image * 255).astype(np.uint8)
+        
 
         ref_image = np.array(refimage.cpu().detach())
         ref_image = ref_image.squeeze()
         regularized_ref_image = regularization_image(ref_image)
-        regularized_ref_image = (ref_image * 255).astype(np.uint8)
-        regularized_ref_image = np.transpose(regularized_ref_image,(1,2,0))
-
+        
         PSNR = getPSNR(regularized_output_image, target_image)
 
         print("PSNR : {}".format(PSNR))
@@ -123,6 +121,13 @@ if __name__ == "__main__":
         regularized_input_image = regularization_image(input_bicubic)
         regularized_input_image = (regularized_input_image * 255).astype(np.uint8)
 
+        
+        regularized_ref_image = (ref_image * 255).astype(np.uint8)
+        regularized_ref_image = np.transpose(regularized_ref_image,(1,2,0))
+        
+        target_image = (target_image * 255).astype(np.uint8)
+        
+        regularized_output_image = (regularized_output_image * 255).astype(np.uint8)
         regularized_output_image = np.transpose(regularized_output_image, (1, 2, 0))
         target_image = np.transpose(target_image,(1,2,0))
 

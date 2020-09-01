@@ -15,13 +15,15 @@ def showpatch(imagepatch, foldername=None, istensor = True):
     if istensor:
         imagepatch = np.array(imagepatch.cpu().detach())
     folderpath = os.path.join("Network_patches",foldername)
+    
+    print("start visulization {}, channelsize : {}".format(foldername,channelsize))
 
     if not os.path.isdir(folderpath):
         os.mkdir(folderpath)
 
     for index in range(batchsize):
         patches = imagepatch[index]
-        for channel in range(channelsize):
+        for channel in range(channelsize//4):
             image = regularization_image(patches[channel])
             image = (image*255).astype(np.uint8)
             #PIL_Input_Image = Image.fromarray(image)
@@ -32,7 +34,7 @@ def showpatch(imagepatch, foldername=None, istensor = True):
 
 def saveoffset(offsetbatch, foldername=None, istensor = False):
     if istensor:
-        offsetbatch = np.array(offsetbatch.detach())
+        offsetbatch = np.array(offsetbatch.cpu().detach())
         offsetbatch = np.transpose(offsetbatch, (0, 2, 3, 1))
 
     sizetemp = offsetbatch.shape[:-1]
@@ -69,7 +71,7 @@ def getPSNR(image1, image2):
    # MSE = MSE/(shape**2)
     MSE = (np.square(image1-image2)).mean(axis = None)
 
-    PSNR = 20*np.log10(255/np.sqrt(MSE))
+    PSNR = 20*np.log10(1/np.sqrt(MSE))
     return PSNR
 
 def pointdot(img, coordtuple = (10,10)):

@@ -2,7 +2,6 @@ import torch.nn as nn
 import torch
 import numpy as np
 from Dynamic_offset_estimator import Dynamic_offset_estimator
-from torch_deform_conv.layers import ConvOffset2D
 from mmcv.ops.deform_conv import DeformConv2d
 from utils import showpatch, saveoffset
 
@@ -41,11 +40,16 @@ class Deformable_Conv_Block(nn.Module):
         input_offset = torch.cat((lr_features,hr_features),dim=1)
         
         estimated_offset = self.offset_estimator(input_offset)
+
+        if showmode :
+            showpatch(estimated_offset, foldername = "DOE_output")
+            showpatch(input_offset,foldername = "offsetinput")
+
         estimated_offset = self.offset_conv(estimated_offset)
 
         if showmode:
             #showpatch(estimated_offset,foldername="extracted_offset_deformconv{}".format(num_block))
-            saveoffset(estimated_offset,foldername="resultoffset_deformconv{}".format(num_block))
+            saveoffset(estimated_offset,foldername="resultoffset_deformconv{}".format(num_block), istensor = True)
         output = self.deformconv( x = hr_features, offset = estimated_offset)
 
         return output

@@ -96,7 +96,7 @@ if __name__ == "__main__":
         #    continue
         input, refimage = input.to(device), refimage.to(device)
 #        output = testmodel(input,refimage, showmode = True)
-        output = testmodel(input, refimage)
+        output = testmodel(input, refimage,showmode = True )
 
         output_image = np.array(output.cpu().detach())
         output_image = output_image.squeeze()

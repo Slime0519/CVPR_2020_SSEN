@@ -13,6 +13,8 @@ import argparse
 import numpy as np
 import os
 
+from torch.utils.tensorboard import SummaryWriter
+
 parser = argparse.ArgumentParser(description="RefSR Network with SSEN Training module")
 parser.add_argument('--pre_trained', type = str, default=None, help = "path of pretrained modules")
 parser.add_argument('--num_epochs', type = int, default = 1000000, help = "Number of epochs")
@@ -73,6 +75,7 @@ if __name__ == "__main__":
         print("load small baseline module")
         Model = Baseline_small()
 
+    writer = SummaryWriter('runs/CVPR_2020_SSEN')
 
     Model = nn.DataParallel(Model)
     Model = Model.to(device)

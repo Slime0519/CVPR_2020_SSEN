@@ -1,5 +1,6 @@
 import torch.nn as nn
 import torch
+from non_local_embedded_gaussian import NONLocalBlock2D
 
 class Dynamic_offset_estimator(nn.Module):
     def __init__(self,input_channelsize):
@@ -7,10 +8,14 @@ class Dynamic_offset_estimator(nn.Module):
         self.downblock1 = self.downsample_block(input_channelsize)
         self.downblock2 = self.downsample_block(64)
         self.downblock3 = self.downsample_block(64)
-
+        """
         self.attentionblock1 = Nonlocal_block(input_channelsize=64)
         self.attentionblock2 = Nonlocal_block(input_channelsize=64)
         self.attentionblock3 = Nonlocal_block(input_channelsize=64)
+        """
+        self.attentionblock1 = NONLocalBlock2D(input_channelsize=64)
+        self.attentionblock2 = NONLocalBlock2D(input_channelsize=64)
+        self.attentionblock3 = NONLocalBlock2D(input_channelsize=64)
 
         self.upblock1 = self.upsample_block()
         self.upblock2 = self.upsample_block()
@@ -24,7 +29,7 @@ class Dynamic_offset_estimator(nn.Module):
         octascale_feature = self.downblock3(quarterscale_feature)
 
         octascale_NLout = self.attentionblock1(octascale_feature)
-        octascale_NLout = octascale_NLout + octascale_feature
+        octascale_NLout = torch.add(octascale_NLout, octascale_feature)
        # print("octascale : {}".format(octascale_NLout.shape))
         octascale_upsampled = self.upblock1(octascale_NLout)
       #  print("octascale_up : {}".format(octascale_upsampled.shape))
@@ -52,18 +57,22 @@ class Dynamic_offset_estimator(nn.Module):
 
     def upsample_block(self, in_odd = True):
         layers = []
+        """
         if in_odd:
             layers.append(
                 nn.ConvTranspose2d(in_channels=64, out_channels=64, kernel_size=3, stride=2, padding=1, output_padding=1, bias=False))
         else :
             layers.append(
                 nn.ConvTranspose2d(in_channels=64, out_channels=64, kernel_size=3, stride=2, padding=0, bias=False))
+        """
+        layers.append(
+            nn.ConvTranspose2d(in_channels=64, out_channels=64, kernel_size=3, stride=2, padding=0, bias=False))
         layers.append(nn.LeakyReLU(inplace=True))
 
         post_model = nn.Sequential(*layers)
         return post_model
 
-
+"""
 class Nonlocal_block(nn.Module):
     def __init__(self,input_channelsize , mode = 'EmbeddedG', dimension = 2):
         super(Nonlocal_block, self).__init__()
@@ -110,3 +119,4 @@ class Nonlocal_block(nn.Module):
         residual_output = final_output + x
 
         return residual_output
+"""

@@ -93,13 +93,13 @@ if __name__ == "__main__":
               torch.load(os.path.join(TrainedMODEL_PATH,prefix_resultname+"_epoch{}.pth".format(PRETRAINED_EPOCH))))
 
         Train_PSNR = np.load(os.path.join(ResultSave_PATH, prefix_resultname+"_Training_Average_PSNR.npy"))
-        Train_loss = np.load(os.path.join(ResultSave_PATH, prefix_resultname+"largerBaseline_Training_Average_loss.npy"))
+        Train_loss = np.load(os.path.join(ResultSave_PATH, prefix_resultname+"_Training_Average_loss.npy"))
 
         for i in range(len(Train_PSNR)):
             PSNR_array_Train[i] = Train_PSNR[i]
             loss_array_Train[i] = Train_loss[i]
 
-    for epoch in range(TOTAL_EPOCHS):
+    for epoch in range(PRETRAINED_EPOCH,TOTAL_EPOCHS):
         Model.train()
         avg_PSNR = 0
         avg_loss = 0
@@ -143,7 +143,7 @@ if __name__ == "__main__":
             PSNR_array_Vaild[epoch] = avg_PSNR/len(Vaild_Dataloader)
             print("evaluation average PSNR : {}".format(PSNR_array_Vaild[epoch]))
         """
-        if (epoch+1) % 100 == 0:
+        if (epoch+1) % 50 == 0:
             np.save(os.path.join(ResultSave_PATH,prefix_resultname+"_Training_Average_PSNR.npy"),PSNR_array_Train)
             np.save(os.path.join(ResultSave_PATH,prefix_resultname+"_Training_Average_loss.npy"),loss_array_Train)
             np.save(os.path.join(ResultSave_PATH,prefix_resultname+"_Vaild_Average_PSNR.npy"),PSNR_array_Vaild)

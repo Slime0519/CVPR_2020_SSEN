@@ -1,8 +1,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import argparse
 
 ResultSave_PATH = "Result_metrics"
+
+parser = argparse.ArgumentParser(description="RefSR Network with SSEN Training module")
+parser.add_argument('--model_size', type = str, default="normal", help = "select model size")
 
 def get_length(array):
     i = 0
@@ -30,8 +34,19 @@ def plot_chart(array, title, xlabel, ylabel, save = False):
 
 
 if __name__ == "__main__":
-    Train_PSNR = np.load(os.path.join(ResultSave_PATH,"largerBaseline_Training_Average_PSNR.npy"))
-    Train_loss = np.load(os.path.join(ResultSave_PATH,"largerBaseline_Training_Average_loss.npy"))
+    opt = parser.parse_args()
+
+    Modelsize = opt.model_size
+
+    if Modelsize == "normal":
+        prefix_resultname = "normalModel"
+    elif Modelsize == "big":
+        prefix_resultname = "bigModel"
+    else:
+        prefix_resultname = "smallModel"
+
+    Train_PSNR = np.load(os.path.join(ResultSave_PATH,prefix_resultname+"_Training_Average_PSNR.npy"))
+    Train_loss = np.load(os.path.join(ResultSave_PATH,prefix_resultname+"_Training_Average_loss.npy"))
    # Eval_Average_PSNR = np.load(os.path.join(ResultSave_PATH,"Vaild_Average_PSNR.npy"))
 
     plot_chart(Train_PSNR[:400],"Average PSNR in Training step","epochs","PSNR",save = False)

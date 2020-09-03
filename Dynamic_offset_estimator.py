@@ -29,17 +29,20 @@ class Dynamic_offset_estimator(nn.Module):
         octascale_feature = self.downblock3(quarterscale_feature)
 
         octascale_NLout = self.attentionblock1(octascale_feature)
-        octascale_NLout = torch.add(octascale_NLout, octascale_feature)
+        #octascale_NLout = torch.add(octascale_NLout, octascale_feature)
+        octascale_NLout = torch.cat((octascale_NLout, octascale_feature),dim = 1)
        # print("octascale : {}".format(octascale_NLout.shape))
         octascale_upsampled = self.upblock1(octascale_NLout)
       #  print("octascale_up : {}".format(octascale_upsampled.shape))
 
         quarterscale_NLout = self.attentionblock2(octascale_upsampled)
-        quarterscale_NLout = quarterscale_NLout + quarterscale_feature
+       # quarterscale_NLout = quarterscale_NLout + quarterscale_feature
+        quarterscale_NLout = torch.cat((quarterscale_NLout,quarterscale_feature),dim = 1)
         quarterscale_upsampled = self.upblock2(quarterscale_NLout)
 
         halfscale_NLout = self.attentionblock3(quarterscale_upsampled)
-        halfscale_NLout = halfscale_NLout + halfscale_feature
+#        halfscale_NLout = halfscale_NLout + halfscale_feature
+        halfscale_NLout = torch.cat((halfscale_NLout, halfscale_feature),dim =1 )
         halfscale_upsampled = self.upblock3(halfscale_NLout)
      #   print("offset size : {}".format(halfscale_upsampled.shape))
 

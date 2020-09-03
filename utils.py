@@ -36,7 +36,7 @@ def saveoffset(offsetbatch, foldername=None, istensor = False):
     if istensor:
         offsetbatch = np.array(offsetbatch.cpu().detach())
         offsetbatch = np.transpose(offsetbatch, (0, 2, 3, 1))
-
+        offsetbatch = np.squeeze(offsetbatch)
     sizetemp = offsetbatch.shape[:-1]
     offset_coord = np.zeros((*sizetemp, int(offsetbatch.shape[-1] / 2), 2), dtype=np.float32)
 

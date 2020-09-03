@@ -13,9 +13,9 @@ class Dynamic_offset_estimator(nn.Module):
         self.attentionblock2 = Nonlocal_block(input_channelsize=64)
         self.attentionblock3 = Nonlocal_block(input_channelsize=64)
         """
-        self.attentionblock1 = NONLocalBlock2D(input_channelsize=64)
-        self.attentionblock2 = NONLocalBlock2D(input_channelsize=64)
-        self.attentionblock3 = NONLocalBlock2D(input_channelsize=64)
+        self.attentionblock1 = NONLocalBlock2D(in_channels=64)
+        self.attentionblock2 = NONLocalBlock2D(in_channels=64)
+        self.attentionblock3 = NONLocalBlock2D(in_channels=64)
 
         self.upblock1 = self.upsample_block()
         self.upblock2 = self.upsample_block()
@@ -57,17 +57,17 @@ class Dynamic_offset_estimator(nn.Module):
 
     def upsample_block(self, in_odd = True):
         layers = []
-        """
+        
         if in_odd:
             layers.append(
                 nn.ConvTranspose2d(in_channels=64, out_channels=64, kernel_size=3, stride=2, padding=1, output_padding=1, bias=False))
         else :
             layers.append(
                 nn.ConvTranspose2d(in_channels=64, out_channels=64, kernel_size=3, stride=2, padding=0, bias=False))
-        """
-        layers.append(
-            nn.ConvTranspose2d(in_channels=64, out_channels=64, kernel_size=3, stride=2, padding=0, bias=False))
-        layers.append(nn.LeakyReLU(inplace=True))
+        
+#        layers.append(
+ #           nn.ConvTranspose2d(in_channels=64, out_channels=64, kernel_size=3, stride=2, padding=0, bias=False))
+  #      layers.append(nn.LeakyReLU(inplace=True))
 
         post_model = nn.Sequential(*layers)
         return post_model

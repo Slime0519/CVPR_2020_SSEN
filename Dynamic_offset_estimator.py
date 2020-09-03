@@ -31,7 +31,7 @@ class Dynamic_offset_estimator(nn.Module):
         octascale_NLout = self.attentionblock1(octascale_feature)
         #octascale_NLout = torch.add(octascale_NLout, octascale_feature)
         octascale_NLout = torch.cat((octascale_NLout, octascale_feature),dim = 1)
-        print(octascale_NLout.shape)
+#        print(octascale_NLout.shape)
        # print("octascale : {}".format(octascale_NLout.shape))
         octascale_upsampled = self.upblock1(octascale_NLout)
       #  print("octascale_up : {}".format(octascale_upsampled.shape))
@@ -64,10 +64,10 @@ class Dynamic_offset_estimator(nn.Module):
         
         if in_odd:
             layers.append(
-                nn.ConvTranspose2d(in_channels=64, out_channels=64, kernel_size=3, stride=2, padding=1, output_padding=1, bias=False))
+                nn.ConvTranspose2d(in_channels=in_channels, out_channels=out_channels, kernel_size=3, stride=2, padding=1, output_padding=1, bias=False))
         else :
             layers.append(
-                nn.ConvTranspose2d(in_channels=64, out_channels=64, kernel_size=3, stride=2, padding=0, bias=False))
+                nn.ConvTranspose2d(in_channels=in_channels, out_channels=out_channels, kernel_size=3, stride=2, padding=0, bias=False))
         
 #        layers.append(
  #           nn.ConvTranspose2d(in_channels=64, out_channels=64, kernel_size=3, stride=2, padding=0, bias=False))

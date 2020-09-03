@@ -17,12 +17,12 @@ class Dynamic_offset_estimator(nn.Module):
         self.attentionblock2 = NONLocalBlock2D(in_channels=64)
         self.attentionblock3 = NONLocalBlock2D(in_channels=64)
 
-        self.upblock1 = self.upsample_block()
-        self.upblock2 = self.upsample_block()
-        self.upblock3 = self.upsample_block()
+        self.upblock1 = self.upsample_block(in_channels = 128, out_channels = 64)
+        self.upblock2 = self.upsample_block(in_channels = 128, out_channels = 64)
+        self.upblock3 = self.upsample_block(in_channels = 128, out_channels = 64)
 
-        self.channelscaling_block = nn.Conv2d(in_channels= 64, out_channels=input_channelsize, kernel_size=3, padding=1, bias=False)
-
+        #self.channelscaling_block = nn.Conv2d(in_channels= 64, out_channels=input_channelsize, kernel_size=3, padding=1, bias=False) for add
+        self.channelscaling_block = nn.Conv2d(in_channels= 128, out_channels=input_channelsize, kernel_size=3, padding=1, bias=False) # for mult
     def forward(self,x):
         halfscale_feature = self.downblock1(x)
         quarterscale_feature = self.downblock2(halfscale_feature)
@@ -31,6 +31,7 @@ class Dynamic_offset_estimator(nn.Module):
         octascale_NLout = self.attentionblock1(octascale_feature)
         #octascale_NLout = torch.add(octascale_NLout, octascale_feature)
         octascale_NLout = torch.cat((octascale_NLout, octascale_feature),dim = 1)
+        print(octascale_NLout.shape)
        # print("octascale : {}".format(octascale_NLout.shape))
         octascale_upsampled = self.upblock1(octascale_NLout)
       #  print("octascale_up : {}".format(octascale_upsampled.shape))
@@ -58,7 +59,7 @@ class Dynamic_offset_estimator(nn.Module):
         pre_model = nn.Sequential(*layers)
         return pre_model
 
-    def upsample_block(self, in_odd = True):
+    def upsample_block(self, in_channels = 64, out_channels = 64, in_odd = True):
         layers = []
         
         if in_odd:

@@ -33,6 +33,12 @@ def showpatch(imagepatch, foldername=None, istensor = True):
 
 
 def saveoffset(offsetbatch, foldername=None, istensor = False):
+    
+    folderpath = os.path.join("Network_pathes",foldername)
+
+    if not os.path.isdir(folderpath):
+        os.mkdir(folderpath)
+
     if istensor:
         offsetbatch = np.array(offsetbatch.cpu().detach())
         offsetbatch = np.transpose(offsetbatch, (0, 2, 3, 1))
@@ -47,9 +53,9 @@ def saveoffset(offsetbatch, foldername=None, istensor = False):
                 offset_coord[y,x,i] = coordtuple
 
 
-    #for i in range(offsetbatch.shape[0]):
-     #   np.save(os.path.join(foldername, "offset_{}.npy".format(i)), offsetbatch[i])
-    return offset_coord
+    for i in range(offsetbatch.shape[0]):
+        np.save(os.path.join(foldername, "offset_{}.npy".format(i)), offsetbatch[i])
+    #return offset_coord
 
 
 def regularization_image(image):

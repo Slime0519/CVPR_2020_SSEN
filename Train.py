@@ -5,20 +5,20 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 
 from Data_gen import Dataset_Vaild, Dataset_Train
-from Baseline import Baseline, L1_Charbonnier_loss
-from Baseline_big import BigBaseline
-from Baseline_small import Baseline_small
+from Models.Train.Baseline import Baseline
+from Models.Train.Baseline_big import BigBaseline
+from Models.Train.Baseline_small import Baseline_small
 
 import argparse
 import numpy as np
 import os
 
 from torch.utils.tensorboard import SummaryWriter
+from Models.Train_utils import L1_Charbonnier_loss
 
 parser = argparse.ArgumentParser(description="RefSR Network with SSEN Training module")
 parser.add_argument('--pre_trained', type = str, default=None, help = "path of pretrained modules")
 parser.add_argument('--num_epochs', type = int, default = 1000000, help = "Number of epochs")
-parser.add_argument('--pre_resulted', type = str, default = None, help = "Data array of previous step")
 parser.add_argument('--batch_size', type = int, default = 32, help = "Batch size")
 parser.add_argument('--learning_rate', type = float, default=1e-4, help ="learning rate")
 parser.add_argument('--gamma', type = float, default = 0.9, help = 'momentum of ADAM optimizer')
@@ -81,7 +81,7 @@ if __name__ == "__main__":
     Model = Model.to(device)
 
     optimizer = optim.Adam(Model.parameters(), lr=lr, betas=(0.9, 0.999))
-    cosine_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=TOTAL_EPOCHS, )
+    cosine_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=TOTAL_EPOCHS,)
 
     criterion = L1_Charbonnier_loss().to(device)
     MSELoss_criterion = nn.MSELoss()
@@ -92,8 +92,10 @@ if __name__ == "__main__":
     trainloader_len = len(Train_Dataloader)
 
     if PRETRAINED_EPOCH>0:
-        Model.load_state_dict(
-              torch.load(os.path.join(TrainedMODEL_PATH,prefix_resultname+"_epoch{}.pth".format(PRETRAINED_EPOCH))))
+        checkpoint = torch.load('checkpoint.pth')
+        model = checkpoint['model']
+        optimizer = checkpoint['optimizer']
+        cosine_scheduler = checkpoint['cos_sched']
 
         Train_PSNR = np.load(os.path.join(ResultSave_PATH, prefix_resultname+"_Training_Average_PSNR.npy"))
         Train_loss = np.load(os.path.join(ResultSave_PATH, prefix_resultname+"_Training_Average_loss.npy"))
@@ -151,5 +153,10 @@ if __name__ == "__main__":
             np.save(os.path.join(ResultSave_PATH,prefix_resultname+"_Training_Average_loss.npy"),loss_array_Train)
             np.save(os.path.join(ResultSave_PATH,prefix_resultname+"_Vaild_Average_PSNR.npy"),PSNR_array_Vaild)
 
-            torch.save(Model.state_dict(), os.path.join(TrainedMODEL_PATH,prefix_resultname+"_epoch{}.pth".format(epoch+1)))
+            checkpoint = {
+                'model': Model,
+                'optimizer': optimizer,
+                'cos_sched': cosine_scheduler}
+            torch.save(checkpoint, os.path.join(TrainedMODEL_PATH,prefix_resultname+"_epoch{}.pth".format(epoch+1)))
+            #torch.save(Model.state_dict(), os.path.join(TrainedMODEL_PATH,prefix_resultname+"_epoch{}.pth".format(epoch+1)))
 

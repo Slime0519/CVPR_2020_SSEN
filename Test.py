@@ -1,12 +1,10 @@
 import torch
 import Data_gen
-from Baseline import Baseline
-from Baseline_big import BigBaseline
+from Models.Train.Baseline import Baseline
+from Models.Train.Baseline_big import BigBaseline
 from torch.utils.data import DataLoader
-import matplotlib.pyplot as plt
-import matplotlib.image as pltimage
 import argparse
-from Baseline_small import Baseline_small
+from Models.Train.Baseline_small import Baseline_small
 
 from utils import regularization_image, getPSNR
 import numpy as np

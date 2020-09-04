@@ -13,6 +13,8 @@ import argparse
 import numpy as np
 import os
 
+import tqdm
+#from torch.utils.tensorboard import SummaryWriter
 from torch.utils.tensorboard import SummaryWriter
 from Models.Train_utils import L1_Charbonnier_loss
 
@@ -75,7 +77,7 @@ if __name__ == "__main__":
         print("load small baseline module")
         Model = Baseline_small()
 
-    writer = SummaryWriter('runs/CVPR_2020_SSEN')
+ #   writer = SummaryWriter('runs/CVPR_2020_SSEN')
 
     Model = nn.DataParallel(Model)
     Model = Model.to(device)
@@ -108,8 +110,8 @@ if __name__ == "__main__":
         Model.train()
         avg_PSNR = 0
         avg_loss = 0
-        print("----Training step-----")
-        for i,(lr_image, hr_image, ref_image) in enumerate(Train_Dataloader):
+        print("Training epoch : {}".format(epoch+1))
+        for lr_image, hr_image, ref_image in tqdm.tqdm(Train_Dataloader, bar_format="{l_bar}{bar:40}{r_bar}"):
             lr_image, hr_image, ref_image = lr_image.to(device), hr_image.to(device), ref_image.to(device)
             optimizer.zero_grad()
 
@@ -123,7 +125,7 @@ if __name__ == "__main__":
 
             loss.backward()
             optimizer.step()
-            print("epoch {} training step : {}/{}".format(epoch + 1, i + 1, trainloader_len))
+ #           print("epoch {} training step : {}/{}".format(epoch + 1, i + 1, trainloader_len))
 
 
         cosine_scheduler.step()
@@ -148,7 +150,7 @@ if __name__ == "__main__":
             PSNR_array_Vaild[epoch] = avg_PSNR/len(Vaild_Dataloader)
             print("evaluation average PSNR : {}".format(PSNR_array_Vaild[epoch]))
         """
-        if (epoch+1) % 50 == 0:
+        if (epoch+1) % 50 == 0 or epoch == 0 :
             np.save(os.path.join(ResultSave_PATH,prefix_resultname+"_Training_Average_PSNR.npy"),PSNR_array_Train)
             np.save(os.path.join(ResultSave_PATH,prefix_resultname+"_Training_Average_loss.npy"),loss_array_Train)
             np.save(os.path.join(ResultSave_PATH,prefix_resultname+"_Vaild_Average_PSNR.npy"),PSNR_array_Vaild)

@@ -1,14 +1,16 @@
 import torch.nn as nn
 import torch
 from Models.Train.Dynamic_offset_estimator import Dynamic_offset_estimator
+from Models.Train.Dynamic_offset_estimator_concat import Dynamic_offset_estimator_concat
 from mmcv.ops.deform_conv import DeformConv2d
 
+
 class SSEN(nn.Module):
-    def __init__(self,in_channels):
+    def __init__(self,in_channels,mode):
         super(SSEN, self).__init__()
-        self.deformblock1 = Deformable_Conv_Block(input_channels= in_channels)
-        self.deformblock2 = Deformable_Conv_Block(input_channels= in_channels)
-        self.deformblock3 = Deformable_Conv_Block(input_channels=in_channels)
+        self.deformblock1 = Deformable_Conv_Block(input_channels= in_channels,mode=mode)
+        self.deformblock2 = Deformable_Conv_Block(input_channels= in_channels,mode=mode)
+        self.deformblock3 = Deformable_Conv_Block(input_channels=in_channels,mode=mode)
 
     def forward(self,lr_batch, init_hr_batch):
 
@@ -18,9 +20,12 @@ class SSEN(nn.Module):
         return hr_out3
 
 class Deformable_Conv_Block(nn.Module):
-    def __init__(self,input_channels):
+    def __init__(self,input_channels,mode):
         super(Deformable_Conv_Block, self).__init__()
-        self.offset_estimator = Dynamic_offset_estimator(input_channelsize=input_channels*2)
+        if mode == "concat":
+            self.offset_estimator = Dynamic_offset_estimator_concat(input_channelsize=input_channels*2)
+        else:
+            self.offset_estimator = Dynamic_offset_estimator(input_channelsize=input_channels * 2)
         self.offset_conv = nn.Conv2d(in_channels=input_channels * 2, out_channels=1 * 2 * 9, kernel_size=3, padding=1, bias=False)
 
         self.deformconv = DeformConv2d(in_channels=input_channels,out_channels=input_channels, kernel_size=3, padding = 1,  bias=False)

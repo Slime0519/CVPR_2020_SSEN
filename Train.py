@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     TOTAL_EPOCHS = opt.num_epochs
     PRETRAINED_PATH = opt.pre_trained
-    PRERESULTED_PATH = opt.pre_resulted
+  #  PRERESULTED_PATH = opt.pre_resulted
     BATCH_SIZE = opt.batch_size
     lr = opt.learning_rate
     gamma = opt.gamma
@@ -52,7 +52,9 @@ if __name__ == "__main__":
         device = torch.device('cpu')
 
 
-    if Modelsize == "normal":
+    if Modelsize == "normal_concat":
+        prefix_resultname = "normalModel_concat"
+    elif Modelsize == "normal":
         prefix_resultname = "normalModel"
     elif Modelsize == "big":
         prefix_resultname = "bigModel"
@@ -60,14 +62,19 @@ if __name__ == "__main__":
         prefix_resultname = "smallModel"
 
     TrainedMODEL_PATH = os.path.join(TrainedMODEL_PATH,prefix_resultname)
+    if not os.path.isdir(TrainedMODEL_PATH):
+        os.mkdir(TrainedMODEL_PATH)
 
     Train_Dataset = Dataset_Train(dirpath_input=TrainDIR_PATH, dirpath_ref=RefDIR_PATH, upscale_factor=4)
     Vaild_Dataset = Dataset_Vaild(dirpath=VaildDIR_PATH, upscale_factor=4)
 
-    Train_Dataloader = DataLoader(dataset=Train_Dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=2, drop_last=True)
+    Train_Dataloader = DataLoader(dataset=Train_Dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4, drop_last=True, pin_memory=True)
     Vaild_Dataloader = DataLoader(dataset=Vaild_Dataset, batch_size=1, shuffle=False, num_workers=0, drop_last=True)
 
-    if Modelsize == "normal":
+    if Modelsize == "normal_concat":
+        print("load concat baseline module")
+        Model = Baseline(mode= "concat")
+    elif Modelsize == "normal":
         print("load original baseline module")
         Model = Baseline()
     elif Modelsize == "big":

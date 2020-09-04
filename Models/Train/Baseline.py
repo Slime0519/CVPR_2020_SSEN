@@ -4,7 +4,7 @@ from Models.Train.SSEN import SSEN
 from Models.Train_utils import make_residual_block, make_downsampling_network
 
 class Baseline(nn.Module):
-    def __init__(self, num_channel = 64):
+    def __init__(self, num_channel = 64, mode = "add"):
         super(Baseline, self).__init__()
         # referenced by EDVR paper implementation code
         # https://github.com/xinntao/EDVR/blob/master/basicsr/models/archs/edvr_arch.py line 251
@@ -12,7 +12,7 @@ class Baseline(nn.Module):
         self.lrfeature_scaler = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=1, bias=False)
         self.feature_extractor = make_residual_block(blocknum=5, input_channel=64, output_channel=64)
 
-        self.SSEN_Network = SSEN(in_channels=num_channel)
+        self.SSEN_Network = SSEN(in_channels=num_channel,mode = mode)
 
         self.preprocessing_residual_block = nn.Conv2d(in_channels=128, out_channels=64, kernel_size=1, bias=False)
         self.residual_blocks = make_residual_block(blocknum=16, input_channel=64, output_channel=64)

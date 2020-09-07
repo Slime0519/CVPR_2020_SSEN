@@ -33,7 +33,7 @@ class Baseline(nn.Module):
         lr_feature_out = self.feature_extractor(input_lr)
         ref_feature_out = self.feature_extractor(ref_input)
 
-        SSEN_out = self.SSEN_Network(lr_batch = lr_feature_out ,init_hr_batch = ref_feature_out, showmode=showmode)
+        SSEN_out = self.SSEN_Network(lr_batch = lr_feature_out ,init_hr_batch = ref_feature_out,)
         residual_input = torch.cat((lr_feature_out, SSEN_out), dim = 1)
         residual_input_scaled = self.preprocessing_residual_block(residual_input)
         out = self.residual_blocks(residual_input_scaled)

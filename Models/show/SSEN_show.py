@@ -1,6 +1,6 @@
 import torch.nn as nn
 import torch
-from Models.Train.Dynamic_offset_estimator import Dynamic_offset_estimator
+from Models.show.Dynamic_offset_estimator_show import Dynamic_offset_estimator_show
 from mmcv.ops.deform_conv import DeformConv2d
 from utils import showpatch, saveoffset
 
@@ -27,7 +27,7 @@ class SSEN_show(nn.Module):
 class Deformable_Conv_Block(nn.Module):
     def __init__(self,input_channels,mode):
         super(Deformable_Conv_Block, self).__init__()
-        self.offset_estimator = Dynamic_offset_estimator(input_channelsize=input_channels*2)
+        self.offset_estimator = Dynamic_offset_estimator_show(input_channelsize=input_channels*2)
         self.offset_conv = nn.Conv2d(in_channels=input_channels * 2, out_channels=1 * 2 * 9, kernel_size=3, padding=1, bias=False)
 
         self.deformconv = DeformConv2d(in_channels=input_channels,out_channels=input_channels, kernel_size=3, padding = 1,  bias=False)

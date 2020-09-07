@@ -34,7 +34,7 @@ def showpatch(imagepatch, foldername=None, istensor = True):
 
 def saveoffset(offsetbatch, foldername=None, istensor = False):
     
-    folderpath = os.path.join("Network_pathes",foldername)
+    folderpath = os.path.join("Network_patches",foldername)
 
     if not os.path.isdir(folderpath):
         os.mkdir(folderpath)
@@ -54,7 +54,7 @@ def saveoffset(offsetbatch, foldername=None, istensor = False):
 
 
     for i in range(offsetbatch.shape[0]):
-        np.save(os.path.join(foldername, "offset_{}.npy".format(i)), offsetbatch[i])
+        np.save(os.path.join(folderpath, "offset_{}.npy".format(i)), offsetbatch[i])
     #return offset_coord
 
 

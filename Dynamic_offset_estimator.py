@@ -17,33 +17,33 @@ class Dynamic_offset_estimator(nn.Module):
         self.attentionblock2 = NONLocalBlock2D(in_channels=64)
         self.attentionblock3 = NONLocalBlock2D(in_channels=64)
 
-        self.upblock1 = self.upsample_block(in_channels = 128, out_channels = 64)
-        self.upblock2 = self.upsample_block(in_channels = 128, out_channels = 64)
-        self.upblock3 = self.upsample_block(in_channels = 128, out_channels = 64)
+        self.upblock1 = self.upsample_block(in_channels = 64, out_channels = 64)
+        self.upblock2 = self.upsample_block(in_channels = 64, out_channels = 64)
+        self.upblock3 = self.upsample_block(in_channels = 64, out_channels = 64)
 
         #self.channelscaling_block = nn.Conv2d(in_channels= 64, out_channels=input_channelsize, kernel_size=3, padding=1, bias=False) for add
-        self.channelscaling_block = nn.Conv2d(in_channels= 128, out_channels=input_channelsize, kernel_size=3, padding=1, bias=False) # for mult
+        self.channelscaling_block = nn.Conv2d(in_channels= 64, out_channels=input_channelsize, kernel_size=3, padding=1, bias=False) # for mult
     def forward(self,x):
         halfscale_feature = self.downblock1(x)
         quarterscale_feature = self.downblock2(halfscale_feature)
         octascale_feature = self.downblock3(quarterscale_feature)
 
         octascale_NLout = self.attentionblock1(octascale_feature)
-        #octascale_NLout = torch.add(octascale_NLout, octascale_feature)
-        octascale_NLout = torch.cat((octascale_NLout, octascale_feature),dim = 1)
+        octascale_NLout = torch.add(octascale_NLout, octascale_feature)
+        #octascale_NLout = torch.cat((octascale_NLout, octascale_feature),dim = 1)
 #        print(octascale_NLout.shape)
        # print("octascale : {}".format(octascale_NLout.shape))
         octascale_upsampled = self.upblock1(octascale_NLout)
       #  print("octascale_up : {}".format(octascale_upsampled.shape))
 
         quarterscale_NLout = self.attentionblock2(octascale_upsampled)
-       # quarterscale_NLout = quarterscale_NLout + quarterscale_feature
-        quarterscale_NLout = torch.cat((quarterscale_NLout,quarterscale_feature),dim = 1)
+        quarterscale_NLout = quarterscale_NLout + quarterscale_feature
+       # quarterscale_NLout = torch.cat((quarterscale_NLout,quarterscale_feature),dim = 1)
         quarterscale_upsampled = self.upblock2(quarterscale_NLout)
 
         halfscale_NLout = self.attentionblock3(quarterscale_upsampled)
-#        halfscale_NLout = halfscale_NLout + halfscale_feature
-        halfscale_NLout = torch.cat((halfscale_NLout, halfscale_feature),dim =1 )
+        halfscale_NLout = halfscale_NLout + halfscale_feature
+#        halfscale_NLout = torch.cat((halfscale_NLout, halfscale_feature),dim =1 )
         halfscale_upsampled = self.upblock3(halfscale_NLout)
      #   print("offset size : {}".format(halfscale_upsampled.shape))
 

@@ -2,9 +2,9 @@ import torch.nn as nn
 import torch
 from non_local_embedded_gaussian import NONLocalBlock2D
 
-class Dynamic_offset_estimator(nn.Module):
+class Dynamic_offset_estimator_show(nn.Module):
     def __init__(self,input_channelsize):
-        super(Dynamic_offset_estimator, self).__init__()
+        super(Dynamic_offset_estimator_show, self).__init__()
         self.downblock1 = self.downsample_block(input_channelsize)
         self.downblock2 = self.downsample_block(64)
         self.downblock3 = self.downsample_block(64)

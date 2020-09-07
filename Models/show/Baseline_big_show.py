@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from Models.Train.SSEN import SSEN
+from Models.show.SSEN_show import SSEN_show
 from utils import showpatch
 
 
@@ -22,9 +22,9 @@ def make_downsampling_network(layernum = 2, in_channels = 3, out_channels = 64):
     model = nn.Sequential(*layers)
     return model
 
-class BigBaseline(nn.Module):
+class BigBaseline_show(nn.Module):
     def __init__(self, num_channel = 256):
-        super(BigBaseline, self).__init__()
+        super(BigBaseline_show, self).__init__()
         self.feature_extractor = make_residual_block(blocknum=5, input_channel=3, output_channel=64)
 
         #referenced by EDVR paper implementation code
@@ -33,7 +33,7 @@ class BigBaseline(nn.Module):
         self.lrfeature_scaler1 = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=3, padding = 1, bias=False)
         self.lrfeature_scaler2 = nn.Conv2d(in_channels=64, out_channels=256, kernel_size=3, padding = 1, bias= False)
         self.feature_extractor = make_residual_block(blocknum=5, input_channel=256, output_channel=256)
-        self.SSEN_Network = SSEN(in_channels=num_channel)
+        self.SSEN_Network = SSEN_show(in_channels=num_channel)
 
         self.preprocessing_residual_block = nn.Conv2d(in_channels=512, out_channels=256, kernel_size=1, bias=False)
         self.residual_blocks = make_residual_block(blocknum=32, input_channel=256, output_channel=256)
@@ -101,7 +101,7 @@ class L1_Charbonnier_loss(nn.Module):
 
 
 if __name__ == "__main__":
-    testmodel = BigBaseline(num_channel=256)
+    testmodel = BigBaseline_show(num_channel=256)
     model_layerlist = (list(testmodel.children()))
     print(model_layerlist)
    # torchsummary.summary(testmodel,(3,160,160),(3,160,160),device='cpu')

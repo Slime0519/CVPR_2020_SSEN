@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from Models.Train.SSEN import SSEN
+from Models.show.SSEN_show import SSEN_show
 from utils import showpatch
 
 
@@ -22,9 +22,9 @@ def make_downsampling_network(layernum = 2, in_channels = 3, out_channels = 64):
     return model
 
 
-class Baseline(nn.Module):
+class Baseline_show(nn.Module):
     def __init__(self, num_channel = 64):
-        super(Baseline, self).__init__()
+        super(Baseline_show, self).__init__()
         # referenced by EDVR paper implementation code
         # https://github.com/xinntao/EDVR/blob/master/basicsr/models/archs/edvr_arch.py line 251
         self.downsampling_network = make_downsampling_network(layernum=2, in_channels=3, out_channels=64)
@@ -35,7 +35,7 @@ class Baseline(nn.Module):
        # self.conv1 = nn.Conv2d(in_channels=3,out_channels=num_channel, kernel_size=3, padding=1, bias=False)
 
         #self.feature_extractor = Feature_extractor_in_SSEN(input_channel=3, output_channel=num_channel)
-        self.SSEN_Network = SSEN(in_channels=num_channel)
+        self.SSEN_Network = SSEN_show(in_channels=num_channel)
 
         self.preprocessing_residual_block = nn.Conv2d(in_channels=128, out_channels=64, kernel_size=1, bias=False)
         self.residual_blocks = make_residual_block(blocknum=16, input_channel=64, output_channel=64)
@@ -101,7 +101,7 @@ class L1_Charbonnier_loss(nn.Module):
 
 
 if __name__ == "__main__":
-    testmodel = Baseline(num_channel=256)
+    testmodel = Baseline_show(num_channel=256)
     model_layerlist = (list(testmodel.children()))
     print(model_layerlist)
    # torchsummary.summary(testmodel,(3,160,160),(3,160,160),device='cpu')

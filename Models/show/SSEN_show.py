@@ -4,9 +4,9 @@ from Models.Train.Dynamic_offset_estimator import Dynamic_offset_estimator
 from mmcv.ops.deform_conv import DeformConv2d
 from utils import showpatch, saveoffset
 
-class SSEN(nn.Module):
+class SSEN_show(nn.Module):
     def __init__(self,in_channels,mode = "normal"):
-        super(SSEN, self).__init__()
+        super(SSEN_show, self).__init__()
         self.deformblock1 = Deformable_Conv_Block(input_channels= in_channels,mode = mode)
         self.deformblock2 = Deformable_Conv_Block(input_channels= in_channels, mode = mode)
         self.deformblock3 = Deformable_Conv_Block(input_channels=in_channels, mode = mode)

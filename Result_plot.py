@@ -18,12 +18,12 @@ def plot_chart(array, title, xlabel, ylabel, save = False):
     length = get_length(array)
     y_max = np.max(array)
     y_max += y_max//5 #plus margin about y axis
-
+    print(length)
     x = range(length)
    # x = range(1000)
     y = range(int(y_max))
 
-    plt.plot(x,array)
+    plt.plot(x,array[:length])
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.title(title)
@@ -49,8 +49,8 @@ if __name__ == "__main__":
     Train_loss = np.load(os.path.join(ResultSave_PATH,prefix_resultname+"_Training_Average_loss.npy"))
    # Eval_Average_PSNR = np.load(os.path.join(ResultSave_PATH,"Vaild_Average_PSNR.npy"))
 
-    plot_chart(Train_PSNR[:400],"Average PSNR in Training step","epochs","PSNR",save = False)
-    plot_chart(Train_loss[:400], "Average loss in Training step","epochs", "loss",save=False)
+    plot_chart(Train_PSNR,"Average PSNR in Training step","epochs","PSNR",save = False)
+    plot_chart(Train_loss, "Average loss in Training step","epochs", "loss",save=False)
   #  plot_chart(Eval_Average_PSNR,"Average PSNR in evaluation step","epochs","PSNR",save=False)
 
 

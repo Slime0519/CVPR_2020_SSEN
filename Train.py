@@ -96,7 +96,7 @@ if __name__ == "__main__":
     Model = Model.to(device)
 
     optimizer = optim.Adam(Model.parameters(), lr=lr, betas=(0.9, 0.999))
-    cosine_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=TOTAL_EPOCHS,)
+    cosine_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_0 = PRETRAINED_EPOCH, T_max=TOTAL_EPOCHS)
 
     criterion = L1_Charbonnier_loss().to(device)
     MSELoss_criterion = nn.MSELoss()

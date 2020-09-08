@@ -99,7 +99,7 @@ if __name__ == "__main__":
 
     optimizer = optim.Adam(Model.parameters(), lr=lr, betas=(0.9, 0.999))
     #cosine_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=TOTAL_EPOCHS, gamma = gamma)
-    scheduler = CosineAnnealingWarmUpRestarts(optimizer=optimizer, gamma = gamma)
+    scheduler = CosineAnnealingWarmUpRestarts(optimizer=optimizer,T_0 = 180, T_up=10, T_mult=2, eta_max=lr,gamma = gamma)
     criterion = L1_Charbonnier_loss().to(device)
     MSELoss_criterion = nn.MSELoss()
     loss_array_Train = np.zeros(TOTAL_EPOCHS)

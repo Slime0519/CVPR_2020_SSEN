@@ -68,7 +68,7 @@ if __name__ == "__main__":
     Train_Dataset = Dataset_Train(dirpath_input=TrainDIR_PATH, dirpath_ref=RefDIR_PATH, upscale_factor=4)
     Vaild_Dataset = Dataset_Vaild(dirpath=VaildDIR_PATH, upscale_factor=4)
 
-    Train_Dataloader = DataLoader(dataset=Train_Dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4, drop_last=True, pin_memory=True)
+    Train_Dataloader = DataLoader(dataset=Train_Dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=2, drop_last=True, pin_memory=True)
     Vaild_Dataloader = DataLoader(dataset=Vaild_Dataset, batch_size=1, shuffle=False, num_workers=0, drop_last=True)
 
     if Modelsize == "normal_concat":
@@ -101,8 +101,8 @@ if __name__ == "__main__":
     trainloader_len = len(Train_Dataloader)
 
     if PRETRAINED_EPOCH>0:
-        checkpoint = torch.load('checkpoint.pth')
-        model = checkpoint['model']
+        checkpoint = torch.load(os.path.join(TrainedMODEL_PATH,prefix_resultname+"_epoch{}.pth".format(PRETRAINED_EPOCH)))
+        Model = checkpoint['model']
         optimizer = checkpoint['optimizer']
         cosine_scheduler = checkpoint['cos_sched']
 

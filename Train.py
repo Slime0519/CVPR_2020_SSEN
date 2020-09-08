@@ -8,6 +8,7 @@ from Data_gen import Dataset_Vaild, Dataset_Train
 from Models.Train.Baseline import Baseline
 from Models.Train.Baseline_big import BigBaseline
 from Models.Train.Baseline_small import Baseline_small
+from Models.Train.lightbaseline import Baseline_light
 
 import argparse
 import numpy as np
@@ -56,6 +57,8 @@ if __name__ == "__main__":
         prefix_resultname = "normalModel_concat"
     elif Modelsize == "normal":
         prefix_resultname = "normalModel"
+    elif Modelsize == "normal_light":
+        prefix_resultname = "normalModel_light"
     elif Modelsize == "big":
         prefix_resultname = "bigModel"
     else:
@@ -68,7 +71,7 @@ if __name__ == "__main__":
     Train_Dataset = Dataset_Train(dirpath_input=TrainDIR_PATH, dirpath_ref=RefDIR_PATH, upscale_factor=4)
     Vaild_Dataset = Dataset_Vaild(dirpath=VaildDIR_PATH, upscale_factor=4)
 
-    Train_Dataloader = DataLoader(dataset=Train_Dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=2, drop_last=True, pin_memory=True)
+    Train_Dataloader = DataLoader(dataset=Train_Dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=2, drop_last=False, pin_memory=True)
     Vaild_Dataloader = DataLoader(dataset=Vaild_Dataset, batch_size=1, shuffle=False, num_workers=0, drop_last=True)
 
     if Modelsize == "normal_concat":
@@ -77,6 +80,9 @@ if __name__ == "__main__":
     elif Modelsize == "normal":
         print("load original baseline module")
         Model = Baseline()
+    elif Modelsize == "normal_light":
+        print("load light extraction model")
+        Model = Baseline_light()
     elif Modelsize == "big":
         print("load big baseline module")
         Model = BigBaseline()

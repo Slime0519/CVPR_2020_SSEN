@@ -39,7 +39,7 @@ if __name__ == "__main__":
     Modelsize = opt.model_size
 
     if Modelsize == "normal":
-        prefix_resultname = "normalModel"
+        prefix_resultname = "normalModel_add"
     elif Modelsize == "big":
         prefix_resultname = "bigModel"
     else:

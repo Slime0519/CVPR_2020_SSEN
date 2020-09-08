@@ -10,6 +10,8 @@ from Models.Train.Baseline_big import BigBaseline
 from Models.Train.Baseline_small import Baseline_small
 from Models.Train.lightbaseline import Baseline_light
 
+from cosine_annearing_with_warmup import CosineAnnealingWarmUpRestarts
+
 import argparse
 import numpy as np
 import os
@@ -96,8 +98,8 @@ if __name__ == "__main__":
     Model = Model.to(device)
 
     optimizer = optim.Adam(Model.parameters(), lr=lr, betas=(0.9, 0.999))
-    cosine_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_0 = PRETRAINED_EPOCH, T_max=TOTAL_EPOCHS)
-
+    #cosine_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=TOTAL_EPOCHS, gamma = gamma)
+    scheduler = CosineAnnealingWarmUpRestarts(optimizer=optimizer, gamma = gamma)
     criterion = L1_Charbonnier_loss().to(device)
     MSELoss_criterion = nn.MSELoss()
     loss_array_Train = np.zeros(TOTAL_EPOCHS)

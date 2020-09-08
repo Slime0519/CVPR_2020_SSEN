@@ -20,12 +20,12 @@ from Models.Train_utils import L1_Charbonnier_loss
 
 parser = argparse.ArgumentParser(description="RefSR Network with SSEN Training module")
 parser.add_argument('--pre_trained', type = str, default=None, help = "path of pretrained modules")
-parser.add_argument('--num_epochs', type = int, default = 1000000, help = "Number of epochs")
+parser.add_argument('--num_epochs', type = int, default = 2703, help = "Number of epochs")
 parser.add_argument('--batch_size', type = int, default = 32, help = "Batch size")
 parser.add_argument('--learning_rate', type = float, default=1e-4, help ="learning rate")
 parser.add_argument('--gamma', type = float, default = 0.9, help = 'momentum of ADAM optimizer')
 parser.add_argument('--pretrained_epoch', type=int, default=0, help ='pretrained models epoch')
-parser.add_argument('--model_size', type = str, default="normal", help = 'select model size')
+parser.add_argument('--model_size', type = str, default="normal_concat", help = 'select model size')
 
 if __name__ == "__main__":
     opt = parser.parse_args()

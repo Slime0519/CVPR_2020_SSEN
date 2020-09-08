@@ -25,7 +25,7 @@ class residual_block(nn.Module):
     def forward(self,x):
         out = self.relu(self.conv1(x))
         out = self.conv2(out)
-        out *= 0.1
+     #  out *= 0.1 for bigmodel
         out = torch.add(out,x)
 
         return out

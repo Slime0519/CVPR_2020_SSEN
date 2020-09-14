@@ -59,6 +59,10 @@ if __name__ == "__main__":
         prefix_resultname = "normalModel_concat"
     elif Modelsize == "normal":
         prefix_resultname = "normalModel"
+    elif Modelsize == "normal_cosine":
+        prefix_resultname = "normalModel_cosine"
+    elif Modelsize == "normal_cosine_concat":
+        prefix_resultname = "normalModel_cosine_concat"
     elif Modelsize == "normal_light":
         prefix_resultname = "normalModel_light"
     elif Modelsize == "big":
@@ -76,10 +80,10 @@ if __name__ == "__main__":
     Train_Dataloader = DataLoader(dataset=Train_Dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=2, drop_last=False, pin_memory=True)
     Vaild_Dataloader = DataLoader(dataset=Vaild_Dataset, batch_size=1, shuffle=False, num_workers=0, drop_last=True)
 
-    if Modelsize == "normal_concat":
+    if Modelsize == "normal_concat" or Modelsize == "normal_cosine_concat":
         print("load concat baseline module")
         Model = Baseline(mode= "concat")
-    elif Modelsize == "normal":
+    elif Modelsize == "normal" or Modelsize == "normal_cosine":
         print("load original baseline module")
         Model = Baseline()
     elif Modelsize == "normal_light":
@@ -98,8 +102,12 @@ if __name__ == "__main__":
     Model = Model.to(device)
 
     optimizer = optim.Adam(Model.parameters(), lr=lr, betas=(0.9, 0.999))
-    #cosine_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=TOTAL_EPOCHS, gamma = gamma)
-    scheduler = CosineAnnealingWarmUpRestarts(optimizer=optimizer,T_0 = 180, T_up=10, T_mult=2, eta_max=lr,gamma = gamma)
+
+    if not Modelsize == "normal_cosine" or Modelsize == "normal_cosine_concat":
+        cosine_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=TOTAL_EPOCHS)
+    else:
+        cosine_scheduler = CosineAnnealingWarmUpRestarts(optimizer=optimizer, T_0 = 180, T_up=10, T_mult=2, eta_max=lr, gamma = gamma, last_epoch = PRETRAINED_EPOCH -1)
+    
     criterion = L1_Charbonnier_loss().to(device)
     MSELoss_criterion = nn.MSELoss()
     loss_array_Train = np.zeros(TOTAL_EPOCHS)

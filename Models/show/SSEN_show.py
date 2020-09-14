@@ -5,7 +5,7 @@ from mmcv.ops.deform_conv import DeformConv2d
 from utils import showpatch, saveoffset
 
 class SSEN_show(nn.Module):
-    def __init__(self,in_channels,mode = "normal"):
+    def __init__(self,in_channels,mode):
         super(SSEN_show, self).__init__()
         self.deformblock1 = Deformable_Conv_Block(input_channels= in_channels,mode = mode)
         self.deformblock2 = Deformable_Conv_Block(input_channels= in_channels, mode = mode)
@@ -33,7 +33,7 @@ class Deformable_Conv_Block(nn.Module):
         self.deformconv = DeformConv2d(in_channels=input_channels,out_channels=input_channels, kernel_size=3, padding = 1,  bias=False)
 
     def forward(self,lr_features, hr_features, showmode = False, num_block =None):
-        input_offset = torch.cat((lr_features,hr_features),dim=1)
+        input_offset = torch.cat((lr_faeatures,hr_features),dim=1)
         
         estimated_offset = self.offset_estimator(input_offset)
 

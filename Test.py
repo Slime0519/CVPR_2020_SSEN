@@ -44,6 +44,8 @@ if __name__ == "__main__":
         prefix_resultname = "normalModel"
     elif Modelsize == "normal_concat":
         prefix_resultname = "normalModel_concat"
+    elif Modelsize == "normal_cosine_concat":
+        prefix_resultname = "normalModel_cosine_concat"
     elif Modelsize == "big":
         prefix_resultname = "bigModel"
     else:
@@ -75,9 +77,9 @@ if __name__ == "__main__":
         testmodel = Baseline()
         if showmode == "show":
             testmodel = Baseline_show()
-    elif Modelsize == "normal_concat":
+    elif Modelsize == "normal_concat" or Modelsize == "normal_cosine_concat":
         print("load concat baseline module")
-        testmodel = Baseline(mode="concat")
+        testmodel = Baseline()
         if showmode == "show":
             testmodel = Baseline_show(mode = "concat")
     elif Modelsize == "big":

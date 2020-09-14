@@ -23,7 +23,7 @@ def make_downsampling_network(layernum = 2, in_channels = 3, out_channels = 64):
 
 
 class Baseline_show(nn.Module):
-    def __init__(self, num_channel = 64):
+    def __init__(self, num_channel = 64, mode = "concat"):
         super(Baseline_show, self).__init__()
         # referenced by EDVR paper implementation code
         # https://github.com/xinntao/EDVR/blob/master/basicsr/models/archs/edvr_arch.py line 251

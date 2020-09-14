@@ -79,7 +79,7 @@ if __name__ == "__main__":
             testmodel = Baseline_show()
     elif Modelsize == "normal_concat" or Modelsize == "normal_cosine_concat":
         print("load concat baseline module")
-        testmodel = Baseline()
+        testmodel = Baseline(mode = "concat")
         if showmode == "show":
             testmodel = Baseline_show(mode = "concat")
     elif Modelsize == "big":
@@ -122,7 +122,7 @@ if __name__ == "__main__":
         #    continue
         input, refimage = input.to(device), refimage.to(device)
 #        output = testmodel(input,refimage, showmode = True)
-        output = testmodel(input, refimage,showmode = True )
+        output = testmodel(input, refimage)
 
         output_image = np.array(output.cpu().detach())
         output_image = output_image.squeeze()
@@ -175,5 +175,6 @@ if __name__ == "__main__":
         PIL_target_Image.save(os.path.join(image_savepath,"target/image{}.png".format(i)))
 
         np.save(os.path.join(image_savepath,"{}_PSNRlist.npy".format(prefix_resultname)),PSNRarr)
-
+        if showmode == "show":
+            break;
 

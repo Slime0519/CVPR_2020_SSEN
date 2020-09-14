@@ -6,7 +6,7 @@ import argparse
 ResultSave_PATH = "Result_metrics"
 
 parser = argparse.ArgumentParser(description="RefSR Network with SSEN Training module")
-parser.add_argument('--model_size', type = str, default="normal", help = "select model size")
+parser.add_argument('--model_size', type = str, default="normal_light", help = "select model size")
 
 def get_length(array):
     i = 0
@@ -40,8 +40,14 @@ if __name__ == "__main__":
 
     if Modelsize == "normal":
         prefix_resultname = "normalModel_add"
+    elif Modelsize == "normal_concat":
+        prefix_resultname = "normalModel_concat"
+    elif Modelsize == "normal_concat_cosine":
+        prefix_resultname = "normalModel_cosine_concat"
     elif Modelsize == "big":
         prefix_resultname = "bigModel"
+    elif Modelsize == 'normal_light':
+        prefix_resultname = "normalModel_light"
     else:
         prefix_resultname = "smallModel"
 

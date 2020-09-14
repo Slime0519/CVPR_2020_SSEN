@@ -9,6 +9,7 @@ from Models.Train.Baseline import Baseline
 from Models.Train.Baseline_big import BigBaseline
 from Models.Train.Baseline_small import Baseline_small
 from Models.Train.lightbaseline import Baseline_light
+from Models.Train.Baseline128 import Baseline128
 
 from cosine_annearing_with_warmup import CosineAnnealingWarmUpRestarts
 
@@ -61,6 +62,8 @@ if __name__ == "__main__":
         prefix_resultname = "normalModel"
     elif Modelsize == "normal_cosine":
         prefix_resultname = "normalModel_cosine"
+    elif Modelsize == "normal128":
+        prefix_resultname = "normalModel_model128"
     elif Modelsize == "normal_cosine_concat":
         prefix_resultname = "normalModel_cosine_concat"
     elif Modelsize == "normal_light":
@@ -86,6 +89,9 @@ if __name__ == "__main__":
     elif Modelsize == "normal" or Modelsize == "normal_cosine":
         print("load original baseline module")
         Model = Baseline()
+    elif Modelsize == "normal128":
+        print("load normal128 model")
+        Model = Baseline128(mode = "concat")
     elif Modelsize == "normal_light":
         print("load light extraction model")
         Model = Baseline_light()
@@ -103,9 +109,10 @@ if __name__ == "__main__":
 
     optimizer = optim.Adam(Model.parameters(), lr=lr, betas=(0.9, 0.999))
 
-    if not Modelsize == "normal_cosine" or Modelsize == "normal_cosine_concat":
+    if not Modelsize == "normal_cosine" or Modelsize == "normal_cosine_concat" or Modelsize == "normal128":
         cosine_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=TOTAL_EPOCHS)
     else:
+        print("load cosinescheduler")
         cosine_scheduler = CosineAnnealingWarmUpRestarts(optimizer=optimizer, T_0 = 180, T_up=10, T_mult=2, eta_max=lr, gamma = gamma, last_epoch = PRETRAINED_EPOCH -1)
     
     criterion = L1_Charbonnier_loss().to(device)

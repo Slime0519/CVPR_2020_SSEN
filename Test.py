@@ -8,6 +8,7 @@ from Models.Train.Baseline_small import Baseline_small
 from Models.show.Baseline_big_show import BigBaseline_show
 from Models.show.Baseline_show import Baseline_show
 from Models.show.Baseline_small_show import Baseline_small_show
+from Models.show.Baseline128_show import Baseline128_show
 from torch.utils.data import DataLoader
 import argparse
 
@@ -91,7 +92,7 @@ if __name__ == "__main__":
             testmodel = BigBaseline_show()
     elif Modelsize == "normal128":
         print("load normal128 model")
-        Model = Baseline128(mode = "concat")
+        Model = Baseline128_show(mode = "concat" , showmode= False)
     else :
         print("load small baseline module")
         testmodel = Baseline_small()

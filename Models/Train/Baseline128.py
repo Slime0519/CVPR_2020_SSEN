@@ -12,9 +12,9 @@ class Baseline128(nn.Module):
         self.lrfeature_scaler = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=1, bias=False)
         self.feature_extractor = make_residual_block(blocknum=5, input_channel=64, output_channel=64)
 
-        self.SSEN_Network = SSEN(in_channels=num_channel,mode = mode)
+        self.SSEN_Network = SSEN(in_channels=64,mode = mode)
 
-        self.residual_blocks = make_residual_block(blocknum=16, input_channel=128, output_channel=128)
+        self.residual_blocks = make_residual_block(blocknum=20, input_channel=128, output_channel=128)
         self.postprocessing_residual_block = nn.Conv2d(in_channels=128, out_channels=64, kernel_size=1, bias=False)
 
         self.upscaling_4x = nn.Sequential(
@@ -25,7 +25,7 @@ class Baseline128(nn.Module):
         )
 
         self.outconv = nn.Conv2d(in_channels=num_channel, out_channels=3, kernel_size=3, padding=1, bias=False)
-
+        
 
     def forward(self,input_lr, ref_input):
         ref_input = self.downsampling_network(ref_input)

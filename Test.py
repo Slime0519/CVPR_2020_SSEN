@@ -44,6 +44,8 @@ if __name__ == "__main__":
         prefix_resultname = "normalModel"
     elif Modelsize == "normal_concat":
         prefix_resultname = "normalModel_concat"
+    elif Modelsize == "normal128":
+        prefix_resultname = "normalModel_model128"
     elif Modelsize == "normal_cosine_concat":
         prefix_resultname = "normalModel_cosine_concat"
     elif Modelsize == "big":
@@ -87,6 +89,9 @@ if __name__ == "__main__":
         testmodel = BigBaseline()
         if showmode == "show":
             testmodel = BigBaseline_show()
+    elif Modelsize == "normal128":
+        print("load normal128 model")
+        Model = Baseline128(mode = "concat")
     else :
         print("load small baseline module")
         testmodel = Baseline_small()

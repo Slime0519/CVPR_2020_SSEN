@@ -5,7 +5,7 @@ from Models.Train_utils import make_residual_block, make_downsampling_network
 from utils import showpatch
 
 class Baseline128_show(nn.Module):
-    def __init__(self, num_channel = 64, mode = "add"):
+    def __init__(self, num_channel = 64, mode = "concat"):
         super(Baseline128_show, self).__init__()
         # referenced by EDVR paper implementation code
         # https://github.com/xinntao/EDVR/blob/master/basicsr/models/archs/edvr_arch.py line 251

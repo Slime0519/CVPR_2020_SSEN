@@ -92,7 +92,7 @@ if __name__ == "__main__":
             testmodel = BigBaseline_show()
     elif Modelsize == "normal128":
         print("load normal128 model")
-        Model = Baseline128_show(mode = "concat" , showmode= False)
+        Model = Baseline128_show(mode = "concat")
     else :
         print("load small baseline module")
         testmodel = Baseline_small()

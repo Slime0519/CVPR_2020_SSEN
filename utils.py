@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 
 
 
-def showpatch(imagepatch, foldername=None, istensor = True):
+def showpatch(imagepatch,  modelname ,foldername=None, istensor = True):
     batchsize = imagepatch.shape[0]
     channelsize = imagepatch.shape[1]
     #print(imagepatch.shape)
@@ -17,10 +17,12 @@ def showpatch(imagepatch, foldername=None, istensor = True):
 
     if istensor:
         imagepatch = np.array(imagepatch.cpu().detach())
-    folderpath = os.path.join("Network_patches",foldername)
+    folderpath = os.path.join("Network_patches",modelname, foldername)
     
     print("start visulization {}, channelsize : {}".format(foldername,channelsize))
 
+    if not os.path.isdir(os.path.join("Network_patches",modelname)):
+        os.mkdir(os.path.join("Network_patches",modelname))
     if not os.path.isdir(folderpath):
         os.mkdir(folderpath)
 
@@ -35,7 +37,7 @@ def showpatch(imagepatch, foldername=None, istensor = True):
             plt.savefig(os.path.join(folderpath,"image{}.png".format(channel)))
 
 
-def saveoffset(offsetbatch, foldername=None, istensor = False):
+def saveoffset(offsetbatch, modelname, foldername, istensor = False):
     if istensor:
         offsetbatch = np.array(offsetbatch.cpu().detach())
         offsetbatch = np.transpose(offsetbatch, (0, 2, 3, 1))
@@ -49,9 +51,14 @@ def saveoffset(offsetbatch, foldername=None, istensor = False):
                 coordtuple = offsetbatch[y,x,i*2:(i+1)*2]
                 offset_coord[y,x,i] = coordtuple
 
+    folderpath = os.path.join("Network_patches",modelname, foldername)
 
-    #for i in range(offsetbatch.shape[0]):
-     #   np.save(os.path.join(foldername, "offset_{}.npy".format(i)), offsetbatch[i])
+    if not os.path.isdir(folderpath):
+        os.mkdir(folderpath)
+
+    for i in range(offsetbatch.shape[0]):
+        np.save(os.path.join(folderpath, "offset_{}.npy".format(i)), offsetbatch[i])
+
     return offset_coord
 
 

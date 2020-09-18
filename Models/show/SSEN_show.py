@@ -42,8 +42,8 @@ class Deformable_Conv_Block(nn.Module):
         estimated_offset = self.offset_estimator(input_offset)
 
         if showmode :
-            showpatch(estimated_offset, foldername = "DOE_output", modelname=modelname)
-            showpatch(input_offset,foldername = "offsetinput", modelname = modelname)
+            showpatch(estimated_offset, foldername = "DOE_output{}".format(num_block), modelname=modelname)
+            showpatch(input_offset,foldername = "offsetinput{}".format(num_block), modelname = modelname)
 
         estimated_offset = self.offset_conv(estimated_offset)
 

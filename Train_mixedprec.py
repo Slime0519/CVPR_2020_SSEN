@@ -103,7 +103,7 @@ if __name__ == "__main__":
         print("load small baseline module")
         Model = Baseline_small()
 
- #   writer = SummaryWriter('runs/CVPR_2020_SSEN')
+    scaler = torch.cuda.amp.GradScaler()
 
     Model = nn.DataParallel(Model)
     Model = Model.to(device)
@@ -147,16 +147,16 @@ if __name__ == "__main__":
             lr_image, hr_image, ref_image = lr_image.to(device), hr_image.to(device), ref_image.to(device)
             optimizer.zero_grad()
 
-            sr_image = Model(lr_image, ref_image)
-
-            loss = criterion(sr_image, hr_image)
+            with torch.cuda.amp.autocast():
+                sr_image = Model(lr_image, ref_image)
+                loss = criterion(sr_image, hr_image)
+            scaler.scale(loss).backward()
             avg_loss += loss
-
             MSELoss = MSELoss_criterion(sr_image, hr_image)
             avg_PSNR += 10 * torch.log10(1/MSELoss)
-
-            loss.backward()
-            optimizer.step()
+            scaler.step(optimizer)
+            scaler.update()
+            #optimizer.step()
  #           print("epoch {} training step : {}/{}".format(epoch + 1, i + 1, trainloader_len))
 
 

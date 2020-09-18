@@ -107,13 +107,13 @@ if __name__ == "__main__":
     Model = nn.DataParallel(Model)
     Model = Model.to(device)
 
-    optimizer = optim.Adam(Model.parameters(), lr=lr, betas=(0.9, 0.999))
+    optimizer = optim.Adam(Model.parameters(), lr=0, betas=(0.9, 0.999))
 
     if not Modelsize == "normal_cosine" or Modelsize == "normal_cosine_concat" or Modelsize == "normal128":
         cosine_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=TOTAL_EPOCHS)
     else:
         print("load cosinescheduler")
-        cosine_scheduler = CosineAnnealingWarmUpRestarts(optimizer=optimizer, T_0 = 180, T_up=10, T_mult=2, eta_max=lr, gamma = gamma, last_epoch = PRETRAINED_EPOCH -1)
+        cosine_scheduler = CosineAnnealingWarmUpRestarts(optimizer=optimizer, T_0 = 190, T_up=10, T_mult=2, eta_max=lr, gamma = gamma, last_epoch = PRETRAINED_EPOCH -1)
     
     criterion = L1_Charbonnier_loss().to(device)
     MSELoss_criterion = nn.MSELoss()

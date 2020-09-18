@@ -14,9 +14,9 @@ class SSEN_show(nn.Module):
 
     def forward(self,lr_batch, init_hr_batch, modelname, showmode = False):
 
-        hr_out1 = self.deformblock1(lr_batch, init_hr_batch,showmode = showmode,num_block = 1)
-        hr_out2 = self.deformblock2(lr_batch, hr_out1, showmode = showmode, num_block = 2)
-        hr_out3 = self.deformblock3(lr_batch, hr_out2, showmode = showmode, num_block = 3)
+        hr_out1 = self.deformblock1(lr_batch, init_hr_batch,showmode = showmode,num_block = 1, modelname = modelname)
+        hr_out2 = self.deformblock2(lr_batch, hr_out1, showmode = showmode, num_block = 2, modelname = modelname)
+        hr_out3 = self.deformblock3(lr_batch, hr_out2, showmode = showmode, num_block = 3, modelname = modelname )
 
         if showmode:
             showpatch(hr_out1, foldername="extracted_features_by_deformconv1", modelname=modelname)

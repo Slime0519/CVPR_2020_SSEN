@@ -92,7 +92,7 @@ if __name__ == "__main__":
             testmodel = BigBaseline_show()
     elif Modelsize == "normal128":
         print("load normal128 model")
-        Model = Baseline128_show(mode = "concat")
+        testmodel = Baseline128_show(mode = "concat")
     else :
         print("load small baseline module")
         testmodel = Baseline_small()
@@ -126,6 +126,8 @@ if __name__ == "__main__":
     for i, (input, target, refimage) in enumerate(Test_Dataloader):
         # if not i == 33:
         #    continue
+        if showmode == "show" and i!= 53:
+            continue;
         input, refimage = input.to(device), refimage.to(device)
 #        output = testmodel(input,refimage, showmode = True)
         output = testmodel(input, refimage)

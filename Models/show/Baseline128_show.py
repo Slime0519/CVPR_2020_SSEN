@@ -16,8 +16,9 @@ class Baseline128_show(nn.Module):
         self.SSEN_Network = SSEN_show(in_channels=num_channel,mode = mode)
 
 
-        self.residual_blocks = make_residual_block(blocknum=16, input_channel=128, output_channel=128)
-        self.preprocessing_residual_block = nn.Conv2d(in_channels=128, out_channels=64, kernel_size=1, bias=False)
+        self.residual_blocks = make_residual_block(blocknum=20, input_channel=128, output_channel=128)
+        self.postprocessing_residual_block = nn.Conv2d(in_channels=128, out_channels=64, kernel_size=1, bias=False)
+#        self.preprocessing_residual_block = nn.Conv2d(in_channels=128, out_channels=64, kernel_size=1, bias=False)
 
         self.upscaling_4x = nn.Sequential(
             nn.Conv2d(in_channels=num_channel, out_channels=4*num_channel, kernel_size=3, padding=1, bias = False),
@@ -35,10 +36,11 @@ class Baseline128_show(nn.Module):
         lr_feature_out = self.feature_extractor(input_lr)
         ref_feature_out = self.feature_extractor(ref_input)
 
-        SSEN_out = self.SSEN_Network(lr_batch = lr_feature_out ,init_hr_batch = ref_feature_out,showmode=showmode)
+        SSEN_out = self.SSEN_Network(lr_batch = lr_feature_out ,init_hr_batch = ref_feature_out,showmode=showmode, modelname = "Base128")
         residual_input = torch.cat((lr_feature_out, SSEN_out), dim = 1)
-        residual_input_scaled = self.preprocessing_residual_block(residual_input)
-        out = self.residual_blocks(residual_input_scaled)
+        #residual_input_scaled = self.preprocessing_residual_block(residual_input)
+        out = self.residual_blocks(residual_input)
+        out = self.postprocessing_residual_block(out)
         out = torch.add(out,lr_feature_out)
 
         if showmode:

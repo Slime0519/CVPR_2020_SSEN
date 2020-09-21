@@ -21,6 +21,7 @@ import tqdm
 #from torch.utils.tensorboard import SummaryWriter
 from torch.utils.tensorboard import SummaryWriter
 from Models.Train_utils import L1_Charbonnier_loss
+from CosineAnnealing_lr import get_lr
 
 parser = argparse.ArgumentParser(description="RefSR Network with SSEN Training module")
 parser.add_argument('--pre_trained', type = str, default=None, help = "path of pretrained modules")
@@ -107,14 +108,16 @@ if __name__ == "__main__":
     Model = nn.DataParallel(Model)
     Model = Model.to(device)
 
-    optimizer = optim.Adam(Model.parameters(), lr=0, betas=(0.9, 0.999))
+    optimizer = optim.Adam(Model.parameters(), lr=lr*0.01, betas=(0.9, 0.999))
 
-    if not Modelsize == "normal_cosine" or Modelsize == "normal_cosine_concat" or Modelsize == "normal128":
+    if not Modelsize == "normal_cosine" and Modelsize == "normal_cosine_concat" and Modelsize == "normal128":
+        print("load ordinary scheduler")
         cosine_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=TOTAL_EPOCHS)
     else:
         print("load cosinescheduler")
         cosine_scheduler = CosineAnnealingWarmUpRestarts(optimizer=optimizer, T_0 = 190, T_up=10, T_mult=2, eta_max=lr, gamma = gamma, last_epoch = PRETRAINED_EPOCH -1)
-    
+      #  cosine_scheduler = optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer,T_mult=2, T_0=190,eta_min=0)
+
     criterion = L1_Charbonnier_loss().to(device)
     MSELoss_criterion = nn.MSELoss()
     loss_array_Train = np.zeros(TOTAL_EPOCHS)
@@ -140,7 +143,8 @@ if __name__ == "__main__":
         Model.train()
         avg_PSNR = 0
         avg_loss = 0
-        print("Training epoch : {}".format(epoch+1))
+        #cosine_scheduler.step()
+        print("Training epoch : {}, learning rate : {}".format(epoch+1,get_lr(optimizer)))
         for lr_image, hr_image, ref_image in tqdm.tqdm(Train_Dataloader, bar_format="{l_bar}{bar:40}{r_bar}"):
             lr_image, hr_image, ref_image = lr_image.to(device), hr_image.to(device), ref_image.to(device)
             optimizer.zero_grad()

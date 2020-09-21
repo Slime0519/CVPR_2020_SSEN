@@ -110,8 +110,7 @@ if __name__ == "__main__":
 
     optimizer = optim.Adam(Model.parameters(), lr=0, betas=(0.9, 0.999))
 
-    if not Modelsize == "normal_cosine" and Modelsize == "normal_cosine_concat" and\
-            Modelsize == "normal128":
+    if not Modelsize == "normal_cosine" and Modelsize == "normal_cosine_concat" and  Modelsize == "normal128":
         cosine_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=TOTAL_EPOCHS)
     else:
         print("load cosinescheduler")
@@ -147,7 +146,7 @@ if __name__ == "__main__":
             lr_image, hr_image, ref_image = lr_image.to(device), hr_image.to(device), ref_image.to(device)
             optimizer.zero_grad()
 
-            with torch.cuda.amp.autocast():
+            with torch.cuda.amp.autocast(): #apply mixed precision training
                 sr_image = Model(lr_image, ref_image)
                 loss = criterion(sr_image, hr_image)
             scaler.scale(loss).backward()
@@ -166,22 +165,7 @@ if __name__ == "__main__":
         loss_array_Train[epoch] = loss/len(Train_Dataloader)
 
         print("Training average PSNR : {}, loss : {}".format(PSNR_array_Train[epoch], loss_array_Train[epoch]))
-        """
-        Model.eval()
-        avg_PSNR = 0
-        print("----Evaluation Step----")
 
-        with torch.no_grad():
-            for lr_image, hr_image in Vaild_Dataloader:
-                lr_image = lr_image.to(device)
-                sr_image = Model(lr_image, ref_image)
-
-                MSELoss = MSELoss_criterion(sr_image,hr_image)
-                avg_PSNR += 10*torch.log10(1/MSELoss)
-
-            PSNR_array_Vaild[epoch] = avg_PSNR/len(Vaild_Dataloader)
-            print("evaluation average PSNR : {}".format(PSNR_array_Vaild[epoch]))
-        """
         if (epoch+1) % 50 == 0 or epoch == 0 :
             np.save(os.path.join(ResultSave_PATH,prefix_resultname+"_Training_Average_PSNR.npy"),PSNR_array_Train)
             np.save(os.path.join(ResultSave_PATH,prefix_resultname+"_Training_Average_loss.npy"),loss_array_Train)

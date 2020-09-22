@@ -23,10 +23,8 @@ class EDSR_baseline(nn.Module):
         lr_feature = self.relu(self.lrfeature_ext2(lr_feature))
         lr_feature = self.feature_extraction_network(lr_feature)
 
-
         ref_feature = self.downsample_module(refinput)
         ref_feature = self.feature_extraction_network(ref_feature)
-
 
         deform_feature = self.ssen(lr_batch = lr_feature, init_hr_batch = ref_feature)
         concated_feature = torch.cat((lr_feature, deform_feature), dim=1)
@@ -34,6 +32,9 @@ class EDSR_baseline(nn.Module):
 
         return reconstruct_image
 
+    def load_pretrained_model(self):
+        dict = torch.load("edsr_baseline_x2-1bc95232.pt")
+        self.EDSR.load_state_dict(dict, strict=False)
 
 if __name__ == "__main__":
     model = EDSR_baseline()

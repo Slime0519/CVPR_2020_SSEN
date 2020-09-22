@@ -64,6 +64,7 @@ class EDSR(nn.Module):
                 if isinstance(param, nn.Parameter):
                     param = param.data
                 try:
+                    print("load weight : {}".format(name))
                     own_state[name].copy_(param)
                 except Exception:
                     if name.find('tail') == -1:
@@ -81,5 +82,5 @@ if __name__ == "__main__":
     model = EDSR()
     dict= torch.load("edsr_baseline_x2-1bc95232.pt")
     model.load_state_dict(dict,strict=False)
-    summary(model, (-1,128,160,160),device="cpu")
+    summary(model, (128,160,160),device="cpu")
 

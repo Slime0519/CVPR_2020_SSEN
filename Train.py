@@ -10,6 +10,7 @@ from Models.Train.Baseline_big import BigBaseline
 from Models.Train.Baseline_small import Baseline_small
 from Models.Train.lightbaseline import Baseline_light
 from Models.Train.Baseline128 import Baseline128
+from Models.EDSR.EDSR_baseline import EDSR_baseline
 
 from cosine_annearing_with_warmup import CosineAnnealingWarmUpRestarts
 
@@ -71,6 +72,8 @@ if __name__ == "__main__":
         prefix_resultname = "normalModel_light"
     elif Modelsize == "big":
         prefix_resultname = "bigModel"
+    elif Modelsize == "SSEN":
+        prefix_resultname = "EDSR"
     else:
         prefix_resultname = "smallModel"
 
@@ -99,9 +102,14 @@ if __name__ == "__main__":
     elif Modelsize == "big":
         print("load big baseline module")
         Model = BigBaseline()
+    elif Modelsize == "SSEN":
+        print("load SSEN baseline")
+        Model = EDSR_baseline()
+        Model.load_pretrained_model()
     else :
         print("load small baseline module")
         Model = Baseline_small()
+
 
  #   writer = SummaryWriter('runs/CVPR_2020_SSEN')
 
@@ -110,12 +118,11 @@ if __name__ == "__main__":
 
     optimizer = optim.Adam(Model.parameters(), lr=0, betas=(0.9, 0.999))
 
-    if not Modelsize == "normal_cosine" and Modelsize == "normal_cosine_concat" and\
-            Modelsize == "normal128":
-        cosine_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=TOTAL_EPOCHS)
-    else:
-        print("load cosinescheduler")
-        cosine_scheduler = CosineAnnealingWarmUpRestarts(optimizer=optimizer, T_0 = 190, T_up=10, T_mult=2, eta_max=lr, gamma = gamma, last_epoch = PRETRAINED_EPOCH -1)
+   # if not Modelsize == "normal_cosine" and Modelsize == "normal_cosine_concat" and  Modelsize == "normal128" and E
+  #      cosine_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=TOTAL_EPOCHS)
+   # else:
+    print("load cosinescheduler")
+    cosine_scheduler = CosineAnnealingWarmUpRestarts(optimizer=optimizer, T_0 = 190, T_up=10, T_mult=2, eta_max=lr, gamma = gamma, last_epoch = PRETRAINED_EPOCH -1)
     
     criterion = L1_Charbonnier_loss().to(device)
     MSELoss_criterion = nn.MSELoss()

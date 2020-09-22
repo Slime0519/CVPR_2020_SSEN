@@ -26,16 +26,16 @@ def lr_transform(image_size, rotate=0, upscale_factor = 4, mode = 'train'):
 
     transform = torch_transform.Compose([
         torch_transform.ToPILImage(),
-     #  torch_transform.Resize(int(image_size//upscale_factor),interpolation=Image.BICUBIC),
-        torch_transform.Resize(40, interpolation=Image.BICUBIC),
+        torch_transform.Resize((image_size[0]//upscale_factor,image_size[1]//upscale_factor), interpolation=Image.BICUBIC),
+        #torch_transform.Resize(40, interpolation=Image.BICUBIC),
         torch_transform.ToTensor()
     ])
 
     if (mode == 'train') and (rotate>0.7):
         transform = torch_transform.Compose([
             torch_transform.ToPILImage(),
-            #torch_transform.Resize(int(image_size // upscale_factor), interpolation=Image.BICUBIC),
-            torch_transform.Resize(40, interpolation=Image.BICUBIC),
+            torch_transform.Resize((image_size[0]//upscale_factor,image_size[1]//upscale_factor), interpolation=Image.BICUBIC),
+            #torch_transform.Resize(40, interpolation=Image.BICUBIC),
             torch_transform.RandomRotation((90, 90)),
             torch_transform.ToTensor()
         ])
@@ -81,6 +81,7 @@ class Dataset_Train(Dataset):
         imagesize = imagesize[1]
 
         rotatenum = np.random.rand()
+        refrotatenum = np.random.rand()
 
         refimage_size = npimage_ref.shape
         if refimage_size[1] <= 160 or refimage_size[0]<=160:
@@ -88,10 +89,11 @@ class Dataset_Train(Dataset):
 
         self.hr_transform = hr_transform(rotate=rotatenum, mode = 'train')
         self.lr_transform = lr_transform(image_size=imagesize, rotate=rotatenum, upscale_factor=self.upscalefactor, mode = 'train')
+        self.ref_transform = hr_transform(rotate = refrotatenum, mode = 'train' )
 
         lr_image = self.lr_transform(npimage_input)
         hr_image = self.hr_transform(npimage_input)
-        ref_image = self.hr_transform(npimage_ref)
+        ref_image = self.ref_transform(npimage_ref)
        # print("{} : lr : {}  / hr : {} / ref : {} ".format(index,lr_image.shape, hr_image.shape, ref_image.shape))
 
         return lr_image, hr_image, ref_image

@@ -11,16 +11,14 @@ def make_model(args, parent=False):
 class EDSR(nn.Module):
     def __init__(self, ):
         super(EDSR, self).__init__()
-
-
-        act = nn.ReLU(True)
+        self.relu = nn.ReLU(True)
 
        # self.sub_mean = common.MeanShift(args.rgb_range)
      #   self.add_mean = common.MeanShift(args.rgb_range, sign=1)
 
         # define head module
-        m_head = [nn.Conv2d(in_channels=3, out_channels=64,kernel_size=3,padding=1, bias=True)]
-      #  m_head = nn.Conv2d(in_channels=128, out_channels=64, kernel_size = 3, padding=1)
+        #m_head = [nn.Conv2d(in_channels=3, out_channels=64,kernel_size=3,padding=1, bias=True)]
+        self.mhead = nn.Conv2d(in_channels=128, out_channels=64, kernel_size = 3, padding=1,bias = True)
         # define body module
         """
         m_body = [
@@ -39,6 +37,7 @@ class EDSR(nn.Module):
             conv(n_feats, args.n_colors, kernel_size)
         ]
         """
+
         m_tail = [
             nn.Conv2d(in_channels=64, out_channels=4 * 64, kernel_size=3, padding=1, bias=True),
             nn.PixelShuffle(2),
@@ -47,19 +46,15 @@ class EDSR(nn.Module):
 
 
 
-        self.head = nn.Sequential(*m_head)
+        #self.head = nn.Sequential(*m_head)
         self.tail = nn.Sequential(*m_tail)
 
-    def forward(self, x):
-      #  x = self.sub_mean(x)
-        x = self.head(x)
-
+    def forward(self, x, lr_feature):
+        x = self.mhead(x)
         res = self.body(x)
-        res += x
+        res = torch.add(res,lr_feature)
 
         x = self.tail(res)
-        #x = self.add_mean(x)
-
         return x
 
     def load_state_dict(self, state_dict, strict=True):
@@ -86,5 +81,5 @@ if __name__ == "__main__":
     model = EDSR()
     dict= torch.load("edsr_baseline_x2-1bc95232.pt")
     model.load_state_dict(dict,strict=False)
-    summary(model, (3,160,160),device="cpu")
+    summary(model, (-1,128,160,160),device="cpu")
 

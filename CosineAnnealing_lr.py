@@ -11,15 +11,17 @@ def get_lr(optimizer):
 if __name__ == "__main__":
     Model = models.vgg19()
     optimizer = optim.Adam(Model.parameters(), lr=0, betas=(0.9, 0.999))
-    cosine_scheduler = CosineAnnealingWarmUpRestarts(optimizer=optimizer, T_0=190, T_up=10, T_mult=2, eta_max=1e-4,
+    #cosine_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=2703)
+    #cosine_scheduler = optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer,T_mult=2, T_0=190,eta_min=0)
+    cosine_scheduler = CosineAnnealingWarmUpRestarts(optimizer=optimizer, T_0=190,T_up = 10, T_mult=2, eta_max=1e-4,
                                                      gamma=0.9)
 
     lr_array = np.zeros(2703)
     for i in range(0,2703):
-        #optimizer.step()
+        optimizer.step()
         cosine_scheduler.step()
 
         lr_array[i] = get_lr(optimizer)
-
+        print(get_lr(optimizer))
     plt.plot(range(0,2703), lr_array)
     plt.show()

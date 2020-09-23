@@ -28,8 +28,8 @@ def showpatch(imagepatch,  modelname ,foldername=None, istensor = True):
 
     for index in range(batchsize):
         patches = imagepatch[index]
-        #for channel in range(0,channelsize,4):
-        for channel in range(0,channelsize):
+        for channel in range(0,channelsize,4):
+        #for channel in range(0,channelsize):
             image = regularization_image(patches[channel])
             image = (image*255).astype(np.uint8)
             #PIL_Input_Image = Image.fromarray(image)

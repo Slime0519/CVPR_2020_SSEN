@@ -72,7 +72,7 @@ if __name__ == "__main__":
         prefix_resultname = "normalModel_light"
     elif Modelsize == "big":
         prefix_resultname = "bigModel"
-    elif Modelsize == "SSEN":
+    elif Modelsize == "EDSR":
         prefix_resultname = "EDSR"
     else:
         prefix_resultname = "smallModel"
@@ -84,8 +84,12 @@ if __name__ == "__main__":
     Train_Dataset = Dataset_Train(dirpath_input=TrainDIR_PATH, dirpath_ref=RefDIR_PATH, upscale_factor=4)
     Vaild_Dataset = Dataset_Vaild(dirpath=VaildDIR_PATH, upscale_factor=4)
 
+    if Modelsize == "EDSR":
+        Train_Dataset = Dataset_Train(dirpath_input=TrainDIR_PATH, dirpath_ref=RefDIR_PATH, upscale_factor=2)
+        Vaild_Dataset = Dataset_Vaild(dirpath=VaildDIR_PATH, upscale_factor=2)
+
     Train_Dataloader = DataLoader(dataset=Train_Dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=2, drop_last=False, pin_memory=True)
-    Vaild_Dataloader = DataLoader(dataset=Vaild_Dataset, batch_size=1, shuffle=False, num_workers=0, drop_last=True)
+    Vaild_Dataloader = DataLoader(dataset=Vaild_Dataset, batch_size=2, shuffle=False, num_workers=0, drop_last=False)
 
     if Modelsize == "normal_concat" or Modelsize == "normal_cosine_concat":
         print("load concat baseline module")
@@ -102,8 +106,8 @@ if __name__ == "__main__":
     elif Modelsize == "big":
         print("load big baseline module")
         Model = BigBaseline()
-    elif Modelsize == "SSEN":
-        print("load SSEN baseline")
+    elif Modelsize == "EDSR":
+        print("load EDSR baseline")
         Model = EDSR_baseline()
         Model.load_pretrained_model()
     else :
@@ -173,13 +177,13 @@ if __name__ == "__main__":
         loss_array_Train[epoch] = loss/len(Train_Dataloader)
 
         print("Training average PSNR : {}, loss : {}".format(PSNR_array_Train[epoch], loss_array_Train[epoch]))
-        """
+
         Model.eval()
         avg_PSNR = 0
         print("----Evaluation Step----")
 
         with torch.no_grad():
-            for lr_image, hr_image in Vaild_Dataloader:
+            for lr_image, hr_image,ref_image in Vaild_Dataloader:
                 lr_image = lr_image.to(device)
                 sr_image = Model(lr_image, ref_image)
 
@@ -188,7 +192,7 @@ if __name__ == "__main__":
 
             PSNR_array_Vaild[epoch] = avg_PSNR/len(Vaild_Dataloader)
             print("evaluation average PSNR : {}".format(PSNR_array_Vaild[epoch]))
-        """
+
         if (epoch+1) % 50 == 0 or epoch == 0 :
             np.save(os.path.join(ResultSave_PATH,prefix_resultname+"_Training_Average_PSNR.npy"),PSNR_array_Train)
             np.save(os.path.join(ResultSave_PATH,prefix_resultname+"_Training_Average_loss.npy"),loss_array_Train)

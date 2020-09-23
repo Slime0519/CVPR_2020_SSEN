@@ -110,18 +110,25 @@ class Dataset_Vaild(Dataset):
 
     def __getitem__(self, index):
         image = Image.open(self.imagelist[index]).convert("RGB")
-        image = np.array(image)
+        ref_image = Image.open(self.imagelist_ref[index]).convert("RGB")
 
+        npimage_input = np.array(image)
+        npimage_ref = np.array(image)
         imagesize = image.shape
         imagesize = imagesize[1]
+        refimage_size = npimage_ref.shape
+        if refimage_size[1] <= 160 or refimage_size[0]<=160:
+            npimage_ref = np.pad(npimage_ref,((0,160-refimage_size[0]),(0,160-refimage_size[1]),(0,0)))
+
         self.hr_transform = hr_transform(mode = 'evaluation')
         self.lr_transform = lr_transform(image_size=imagesize, upscale_factor = self.upscale_factor, mode = 'evaluation')
 
         hr_image = self.hr_transform(image)
         lr_image = self.lr_transform(hr_image)
+        ref_image = self.hr_transform(npimage_ref)
         print("size of hr_image : {}".format(hr_image.shape))
         print("size of hr_image : {}".format(lr_image.shape))
-        return lr_image, hr_image
+        return lr_image, hr_image, ref_image
 
     def __len__(self):
         return len(self.imagelist)

@@ -9,7 +9,7 @@ from Models.show.Baseline_big_show import BigBaseline_show
 from Models.show.Baseline_show import Baseline_show
 from Models.show.Baseline_small_show import Baseline_small_show
 from Models.show.Baseline128_show import Baseline128_show
-from Models.EDSR.EDSR_baseline import EDSR_baseline
+from Models.EDSR.EDSR_baseline import EDSR_baseline, EDSR_baseline_show
 from torch.utils.data import DataLoader
 import argparse
 
@@ -99,10 +99,13 @@ if __name__ == "__main__":
     elif Modelsize == "EDSR":
         print("load EDSR baseline")
         testmodel = EDSR_baseline()
+        if showmode == "show":
+            testmodel = EDSR_baseline_show()
     else :
         print("load small baseline module")
         testmodel = Baseline_small()
         if showmode == "show":
+            print("load showversion")
             testmodel = Baseline_small_show()
     
     testmodel.to(device)

@@ -4,9 +4,7 @@ from Models.Train_utils import make_residual_block
 
 import torch.nn as nn
 from torchsummary import summary
-
-def make_model(args, parent=False):
-    return EDSR(args)
+from utils import showpatch
 
 class EDSR(nn.Module):
     def __init__(self, ):
@@ -77,6 +75,30 @@ class EDSR(nn.Module):
                 if name.find('tail') == -1:
                     raise KeyError('unexpected key "{}" in state_dict'
                                    .format(name))
+
+
+class EDSR_show(nn.Module):
+    def __init__(self, ):
+        super(EDSR_show, self).__init__()
+        self.relu = nn.ReLU(True)
+
+        self.mhead = nn.Conv2d(in_channels=128, out_channels=64, kernel_size=3, padding=1, bias=True)
+        self.body = make_residual_block(blocknum=16, input_channel=64, output_channel=64)
+        # define tail module
+        m_tail = [
+            nn.Conv2d(in_channels=64, out_channels=4 * 64, kernel_size=3, padding=1, bias=True),
+            nn.PixelShuffle(2),
+            nn.Conv2d(in_channels=64, out_channels=3, kernel_size=3, padding=1, bias=True)
+        ]
+        self.tail = nn.Sequential(*m_tail)
+
+    def forward(self, x, lr_feature):
+        x = self.mhead(x)
+        res = self.body(x)
+        res = torch.add(res, lr_feature)
+        showpatch(res, foldername="features_after_reconstruction_blocks", modelname="EDSR")
+        x = self.tail(res)
+        return x
 
 
 if __name__ == "__main__":

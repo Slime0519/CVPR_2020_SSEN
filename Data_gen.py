@@ -23,19 +23,19 @@ def hr_transform(rotate=0, mode = 'train'):
     return transform
 
 def lr_transform(image_size, rotate=0, upscale_factor = 4, mode = 'train'):
-
+    
     transform = torch_transform.Compose([
         torch_transform.ToPILImage(),
-     #  torch_transform.Resize(int(image_size//upscale_factor),interpolation=Image.BICUBIC),
-        torch_transform.Resize(40, interpolation=Image.BICUBIC),
+        torch_transform.Resize((image_size//upscale_factor,image_size//upscale_factor), interpolation=Image.BICUBIC),
+        #torch_transform.Resize(40, interpolation=Image.BICUBIC),
         torch_transform.ToTensor()
     ])
 
     if (mode == 'train') and (rotate>0.7):
         transform = torch_transform.Compose([
             torch_transform.ToPILImage(),
-            #torch_transform.Resize(int(image_size // upscale_factor), interpolation=Image.BICUBIC),
-            torch_transform.Resize(40, interpolation=Image.BICUBIC),
+            torch_transform.Resize((image_size//upscale_factor,image_size//upscale_factor), interpolation=Image.BICUBIC),
+            #torch_transform.Resize(40, interpolation=Image.BICUBIC),
             torch_transform.RandomRotation((90, 90)),
             torch_transform.ToTensor()
         ])
@@ -77,21 +77,25 @@ class Dataset_Train(Dataset):
         npimage_input = np.array(input_image)
         npimage_ref = np.array(ref_image)
 
-        imagesize = npimage_ref.shape
-        imagesize = imagesize[1]
+        inputsize = npimage_input.shape
 
         rotatenum = np.random.rand()
+        refrotatenum = np.random.rand()
 
         refimage_size = npimage_ref.shape
-        if refimage_size[1] <= 160 or refimage_size[0]<=160:
+        if refimage_size[1] < 160 or refimage_size[0]< 160:
             npimage_ref = np.pad(npimage_ref,((0,160-refimage_size[0]),(0,160-refimage_size[1]),(0,0)))
-
+        if inputsize[1]<160 or inputsize[0]<160:
+            npimage_input = np.pad(npimage_input,((0,160-inputsize[0]),(0,160-inputsize[1]),(0,0)))
+        
+        inputimagesize = npimage_input.shape[0]
         self.hr_transform = hr_transform(rotate=rotatenum, mode = 'train')
-        self.lr_transform = lr_transform(image_size=imagesize, rotate=rotatenum, upscale_factor=self.upscalefactor, mode = 'train')
+        self.lr_transform = lr_transform(image_size=inputimagesize, rotate=rotatenum, upscale_factor=self.upscalefactor, mode = 'train')
+        self.ref_transform = hr_transform(rotate = refrotatenum, mode = 'train' )
 
         lr_image = self.lr_transform(npimage_input)
         hr_image = self.hr_transform(npimage_input)
-        ref_image = self.hr_transform(npimage_ref)
+        ref_image = self.ref_transform(npimage_ref)
        # print("{} : lr : {}  / hr : {} / ref : {} ".format(index,lr_image.shape, hr_image.shape, ref_image.shape))
 
         return lr_image, hr_image, ref_image
@@ -108,18 +112,28 @@ class Dataset_Vaild(Dataset):
 
     def __getitem__(self, index):
         image = Image.open(self.imagelist[index]).convert("RGB")
-        image = np.array(image)
+        ref_image = Image.open(self.imagelist_ref[index]).convert("RGB")
 
-        imagesize = image.shape
-        imagesize = imagesize[1]
+        npimage_input = np.array(image)
+        npimage_ref = np.array(image)
+        
+        inputsize = npimage_input.shape
+        refimage_size = npimage_ref.shape
+        if refimage_size[1] < 160 or refimage_size[0]<160:
+            npimage_ref = np.pad(npimage_ref,((0,160-refimage_size[0]),(0,160-refimage_size[1]),(0,0)))
+        if inputsize[1]<160 or inputsize[0]<160:
+            npimage_input = np.pad(npimage_input,((0,160-inputsize[0]),(0,160-inputsize[1]),(0,0)))
+        
+        inputimagesize = npimage_input.shape[0]
         self.hr_transform = hr_transform(mode = 'evaluation')
-        self.lr_transform = lr_transform(image_size=imagesize, upscale_factor = self.upscale_factor, mode = 'evaluation')
+        self.lr_transform = lr_transform(image_size=inputimagesize, upscale_factor = self.upscale_factor, mode = 'evaluation')
 
         hr_image = self.hr_transform(image)
         lr_image = self.lr_transform(hr_image)
+        ref_image = self.hr_transform(npimage_ref)
         print("size of hr_image : {}".format(hr_image.shape))
         print("size of hr_image : {}".format(lr_image.shape))
-        return lr_image, hr_image
+        return lr_image, hr_image, ref_image
 
     def __len__(self):
         return len(self.imagelist)

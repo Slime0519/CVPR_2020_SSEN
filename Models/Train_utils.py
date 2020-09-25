@@ -15,26 +15,26 @@ class L1_Charbonnier_loss(nn.Module):
         return loss
 
 class residual_block(nn.Module):
-    def __init__(self, input_channel = 256, output_channel = 256):
+    def __init__(self, input_channel = 256, output_channel = 256, bias = False):
         super(residual_block, self).__init__()
 
-        self.conv1 = nn.Conv2d(in_channels=input_channel,out_channels=input_channel, kernel_size=3, padding=1, bias=False)
-        self.conv2 = nn.Conv2d(in_channels=input_channel,out_channels=output_channel, kernel_size=3, padding=1, bias = False)
+        self.conv1 = nn.Conv2d(in_channels=input_channel,out_channels=input_channel, kernel_size=3, padding=1, bias=bias)
+        self.conv2 = nn.Conv2d(in_channels=input_channel,out_channels=output_channel, kernel_size=3, padding=1, bias = bias)
         self.relu = nn.ReLU(inplace=True)
 
     def forward(self,x):
         out = self.relu(self.conv1(x))
         out = self.conv2(out)
-        out *= 0.1
+     #  out *= 0.1 for bigmodel
         out = torch.add(out,x)
 
         return out
 
-def make_residual_block(blocknum=32, input_channel = 64, output_channel = 64):
+def make_residual_block(blocknum=32, input_channel = 64, output_channel = 64, bias = False):
     residual_layers = []
-    residual_layers.append(residual_block(input_channel=input_channel, output_channel = output_channel))
-    for i in range(blocknum-1):
-        residual_layers.append(residual_block(input_channel=output_channel, output_channel = output_channel))
+    #residual_layers.append(residual_block(input_channel=input_channel, output_channel = output_channel,bias=bias))
+    for i in range(blocknum):
+        residual_layers.append(residual_block(input_channel=output_channel, output_channel = output_channel, bias = bias))
     blockpart_model = nn.Sequential(*residual_layers)
     return blockpart_model
 

@@ -8,6 +8,11 @@ from Data_gen import Dataset_Vaild, Dataset_Train
 from Models.Train.Baseline import Baseline
 from Models.Train.Baseline_big import BigBaseline
 from Models.Train.Baseline_small import Baseline_small
+from Models.Train.lightbaseline import Baseline_light
+from Models.Train.Baseline128 import Baseline128
+from Models.EDSR.EDSR_baseline import EDSR_baseline
+
+from cosine_annearing_with_warmup import CosineAnnealingWarmUpRestarts
 
 import argparse
 import numpy as np
@@ -17,15 +22,17 @@ import tqdm
 #from torch.utils.tensorboard import SummaryWriter
 from torch.utils.tensorboard import SummaryWriter
 from Models.Train_utils import L1_Charbonnier_loss
+from CosineAnnealing_lr import get_lr
+
 
 parser = argparse.ArgumentParser(description="RefSR Network with SSEN Training module")
 parser.add_argument('--pre_trained', type = str, default=None, help = "path of pretrained modules")
-parser.add_argument('--num_epochs', type = int, default = 1000000, help = "Number of epochs")
+parser.add_argument('--num_epochs', type = int, default = 2703, help = "Number of epochs")
 parser.add_argument('--batch_size', type = int, default = 32, help = "Batch size")
 parser.add_argument('--learning_rate', type = float, default=1e-4, help ="learning rate")
 parser.add_argument('--gamma', type = float, default = 0.9, help = 'momentum of ADAM optimizer')
 parser.add_argument('--pretrained_epoch', type=int, default=0, help ='pretrained models epoch')
-parser.add_argument('--model_size', type = str, default="normal", help = 'select model size')
+parser.add_argument('--model_size', type = str, default="normal_concat", help = 'select model size')
 
 if __name__ == "__main__":
     opt = parser.parse_args()
@@ -56,8 +63,18 @@ if __name__ == "__main__":
         prefix_resultname = "normalModel_concat"
     elif Modelsize == "normal":
         prefix_resultname = "normalModel"
+    elif Modelsize == "normal_cosine":
+        prefix_resultname = "normalModel_cosine"
+    elif Modelsize == "normal128":
+        prefix_resultname = "normalModel_model128"
+    elif Modelsize == "normal_cosine_concat":
+        prefix_resultname = "normalModel_cosine_concat"
+    elif Modelsize == "normal_light":
+        prefix_resultname = "normalModel_light"
     elif Modelsize == "big":
         prefix_resultname = "bigModel"
+    elif Modelsize == "EDSR":
+        prefix_resultname = "EDSR"
     else:
         prefix_resultname = "smallModel"
 
@@ -68,30 +85,50 @@ if __name__ == "__main__":
     Train_Dataset = Dataset_Train(dirpath_input=TrainDIR_PATH, dirpath_ref=RefDIR_PATH, upscale_factor=4)
     Vaild_Dataset = Dataset_Vaild(dirpath=VaildDIR_PATH, upscale_factor=4)
 
-    Train_Dataloader = DataLoader(dataset=Train_Dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4, drop_last=True, pin_memory=True)
-    Vaild_Dataloader = DataLoader(dataset=Vaild_Dataset, batch_size=1, shuffle=False, num_workers=0, drop_last=True)
+    if Modelsize == "EDSR":
+        Train_Dataset = Dataset_Train(dirpath_input=TrainDIR_PATH, dirpath_ref=RefDIR_PATH, upscale_factor=2)
+        Vaild_Dataset = Dataset_Vaild(dirpath=VaildDIR_PATH, upscale_factor=2)
 
-    if Modelsize == "normal_concat":
+    Train_Dataloader = DataLoader(dataset=Train_Dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4, drop_last=False, pin_memory=True)
+    Vaild_Dataloader = DataLoader(dataset=Vaild_Dataset, batch_size=4, shuffle=False, num_workers=4, drop_last=False)
+
+    if Modelsize == "normal_concat" or Modelsize == "normal_cosine_concat":
         print("load concat baseline module")
         Model = Baseline(mode= "concat")
-    elif Modelsize == "normal":
+    elif Modelsize == "normal" or Modelsize == "normal_cosine":
         print("load original baseline module")
         Model = Baseline()
+    elif Modelsize == "normal128":
+        print("load normal128 model")
+        Model = Baseline128(mode = "concat")
+    elif Modelsize == "normal_light":
+        print("load light extraction model")
+        Model = Baseline_light()
     elif Modelsize == "big":
         print("load big baseline module")
         Model = BigBaseline()
+    elif Modelsize == "EDSR":
+        print("load EDSR baseline")
+        Model = EDSR_baseline()
+        Model.load_pretrained_model()
     else :
         print("load small baseline module")
         Model = Baseline_small()
 
- #   writer = SummaryWriter('runs/CVPR_2020_SSEN')
+
+    #   writer = SummaryWriter('runs/CVPR_2020_SSEN')
 
     Model = nn.DataParallel(Model)
     Model = Model.to(device)
 
-    optimizer = optim.Adam(Model.parameters(), lr=lr, betas=(0.9, 0.999))
-    cosine_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=TOTAL_EPOCHS,)
+    optimizer = optim.Adam(Model.parameters(), lr=lr*0.01, betas=(0.9, 0.999))
 
+    # if not Modelsize == "normal_cosine" and Modelsize == "normal_cosine_concat" and  Modelsize == "normal128" and E
+  #      cosine_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=TOTAL_EPOCHS)
+   # else:
+    print("load cosinescheduler")
+    cosine_scheduler = CosineAnnealingWarmUpRestarts(optimizer=optimizer, T_0 = 190, T_up=10, T_mult=2, eta_max=lr, gamma = gamma, last_epoch = PRETRAINED_EPOCH -1)
+    
     criterion = L1_Charbonnier_loss().to(device)
     MSELoss_criterion = nn.MSELoss()
     loss_array_Train = np.zeros(TOTAL_EPOCHS)
@@ -101,8 +138,8 @@ if __name__ == "__main__":
     trainloader_len = len(Train_Dataloader)
 
     if PRETRAINED_EPOCH>0:
-        checkpoint = torch.load('checkpoint.pth')
-        model = checkpoint['model']
+        checkpoint = torch.load(os.path.join(TrainedMODEL_PATH,prefix_resultname+"_epoch{}.pth".format(PRETRAINED_EPOCH)))
+        Model = checkpoint['model']
         optimizer = checkpoint['optimizer']
         cosine_scheduler = checkpoint['cos_sched']
 
@@ -117,13 +154,14 @@ if __name__ == "__main__":
         Model.train()
         avg_PSNR = 0
         avg_loss = 0
-        print("Training epoch : {}".format(epoch+1))
+        #cosine_scheduler.step()
+        print("Training epoch : {}, learning rate : {}".format(epoch+1,get_lr(optimizer)))
         for lr_image, hr_image, ref_image in tqdm.tqdm(Train_Dataloader, bar_format="{l_bar}{bar:40}{r_bar}"):
             lr_image, hr_image, ref_image = lr_image.to(device), hr_image.to(device), ref_image.to(device)
             optimizer.zero_grad()
-
+#            print("datatype : {}".format(type(lr_image)))
             sr_image = Model(lr_image, ref_image)
-
+            
             loss = criterion(sr_image, hr_image)
             avg_loss += loss
 
@@ -147,7 +185,7 @@ if __name__ == "__main__":
         print("----Evaluation Step----")
 
         with torch.no_grad():
-            for lr_image, hr_image in Vaild_Dataloader:
+            for lr_image, hr_image,ref_image in Vaild_Dataloader:
                 lr_image = lr_image.to(device)
                 sr_image = Model(lr_image, ref_image)
 

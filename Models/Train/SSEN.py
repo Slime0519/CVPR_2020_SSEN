@@ -26,9 +26,9 @@ class Deformable_Conv_Block(nn.Module):
             self.offset_estimator = Dynamic_offset_estimator_concat(input_channelsize=input_channels*2)
         else:
             self.offset_estimator = Dynamic_offset_estimator(input_channelsize=input_channels * 2)
-        self.offset_conv = nn.Conv2d(in_channels=input_channels * 2, out_channels=1 * 2 * 9, kernel_size=3, padding=1, bias=False)
+        self.offset_conv = nn.Conv2d(in_channels=input_channels * 2, out_channels=1 * 2 * 9, kernel_size=3, padding=1, bias=True)
 
-        self.deformconv = DeformConv2d(in_channels=input_channels,out_channels=input_channels, kernel_size=3, padding = 1,  bias=False)
+        self.deformconv = DeformConv2d(in_channels=input_channels,out_channels=input_channels, kernel_size=3, padding = 1,  bias=True)
 
     def forward(self,lr_features, hr_features):
         input_offset = torch.cat((lr_features,hr_features),dim=1)

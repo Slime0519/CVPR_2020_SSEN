@@ -8,6 +8,8 @@ from Models.Train.Baseline_small import Baseline_small
 from Models.show.Baseline_big_show import BigBaseline_show
 from Models.show.Baseline_show import Baseline_show
 from Models.show.Baseline_small_show import Baseline_small_show
+from Models.show.Baseline128_show import Baseline128_show
+from Models.EDSR.EDSR_baseline import EDSR_baseline
 from torch.utils.data import DataLoader
 import argparse
 
@@ -44,8 +46,14 @@ if __name__ == "__main__":
         prefix_resultname = "normalModel"
     elif Modelsize == "normal_concat":
         prefix_resultname = "normalModel_concat"
+    elif Modelsize == "normal128":
+        prefix_resultname = "normalModel_model128"
+    elif Modelsize == "normal_cosine_concat":
+        prefix_resultname = "normalModel_cosine_concat"
     elif Modelsize == "big":
         prefix_resultname = "bigModel"
+    elif Modelsize == "EDSR":
+        prefix_resultname = "EDSR"
     else:
         prefix_resultname = "smallModel"
 
@@ -75,9 +83,9 @@ if __name__ == "__main__":
         testmodel = Baseline()
         if showmode == "show":
             testmodel = Baseline_show()
-    elif Modelsize == "normal_concat":
+    elif Modelsize == "normal_concat" or Modelsize == "normal_cosine_concat":
         print("load concat baseline module")
-        testmodel = Baseline(mode="concat")
+        testmodel = Baseline(mode = "concat")
         if showmode == "show":
             testmodel = Baseline_show(mode = "concat")
     elif Modelsize == "big":
@@ -85,6 +93,12 @@ if __name__ == "__main__":
         testmodel = BigBaseline()
         if showmode == "show":
             testmodel = BigBaseline_show()
+    elif Modelsize == "normal128":
+        print("load normal128 model")
+        testmodel = Baseline128_show(mode = "concat")
+    elif Modelsize == "EDSR":
+        print("load EDSR baseline")
+        testmodel = EDSR_baseline()
     else :
         print("load small baseline module")
         testmodel = Baseline_small()
@@ -93,8 +107,10 @@ if __name__ == "__main__":
     
     testmodel.to(device)
     Test_Dataset = Data_gen.Dataset_Test(dirpath=testset_dirpath,upscale_factor=4, mode = "XH")
-    Test_Dataloader = DataLoader(dataset=Test_Dataset, shuffle=False, batch_size=1, num_workers=0)
+    if Modelsize == "EDSR":
+       Test_Dataset = Data_gen.Dataset_Test(dirpath = testset_dirpath, upscale_factor =2 ,mode = "XH")
 
+    Test_Dataloader = DataLoader(dataset=Test_Dataset, shuffle=False, batch_size=1, num_workers=0)
     # original saved file with DataParallel
     checkpoint = torch.load(os.path.join(model_dirpath,prefix_resultname+"_epoch{}.pth".format(model_epoch)))
     loadedmodel = checkpoint['model']
@@ -118,9 +134,11 @@ if __name__ == "__main__":
     for i, (input, target, refimage) in enumerate(Test_Dataloader):
         # if not i == 33:
         #    continue
+        if showmode == "show" and i!= 53:
+            continue;
         input, refimage = input.to(device), refimage.to(device)
 #        output = testmodel(input,refimage, showmode = True)
-        output = testmodel(input, refimage,showmode = True )
+        output = testmodel(input, refimage)
 
         output_image = np.array(output.cpu().detach())
         output_image = output_image.squeeze()
@@ -173,5 +191,6 @@ if __name__ == "__main__":
         PIL_target_Image.save(os.path.join(image_savepath,"target/image{}.png".format(i)))
 
         np.save(os.path.join(image_savepath,"{}_PSNRlist.npy".format(prefix_resultname)),PSNRarr)
-
+        if showmode == "show":
+            break;
 

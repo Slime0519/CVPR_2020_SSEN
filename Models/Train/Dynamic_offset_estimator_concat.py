@@ -9,15 +9,15 @@ class Dynamic_offset_estimator_concat(nn.Module):
         self.downblock2 = self.downsample_block(64)
         self.downblock3 = self.downsample_block(64)
 
-        self.attentionblock1 = NONLocalBlock2D(input_channels=64)
-        self.attentionblock2 = NONLocalBlock2D(input_channels=64)
-        self.attentionblock3 = NONLocalBlock2D(input_channels=64)
+        self.attentionblock1 = NONLocalBlock2D(in_channels=64)
+        self.attentionblock2 = NONLocalBlock2D(in_channels=64)
+        self.attentionblock3 = NONLocalBlock2D(in_channels=64)
 
         self.upblock1 = self.upsample_block(in_channels=128,out_channels=64)
         self.upblock2 = self.upsample_block(in_channels=128,out_channels=64)
         self.upblock3 = self.upsample_block(in_channels=128,out_channels=64)
 
-        self.channelscaling_block = nn.Conv2d(in_channels= 64, out_channels=input_channelsize, kernel_size=3, padding=1, bias=False)
+        self.channelscaling_block = nn.Conv2d(in_channels= 64, out_channels=input_channelsize, kernel_size=3, padding=1, bias=True)
 
     def forward(self,x):
         halfscale_feature = self.downblock1(x)
@@ -42,7 +42,7 @@ class Dynamic_offset_estimator_concat(nn.Module):
     def downsample_block(self, input_channelsize):
         layers = []
         layers.append(
-            nn.Conv2d(in_channels=input_channelsize, out_channels=64, kernel_size=3, stride=2, padding=1, bias=False))
+            nn.Conv2d(in_channels=input_channelsize, out_channels=64, kernel_size=3, stride=2, padding=1, bias=True))
         layers.append(nn.LeakyReLU(inplace=True))
 
         pre_model = nn.Sequential(*layers)
@@ -53,10 +53,10 @@ class Dynamic_offset_estimator_concat(nn.Module):
 
         if in_odd:
             layers.append(
-                nn.ConvTranspose2d(in_channels=in_channels, out_channels=out_channels, kernel_size=3, stride=2, padding=1, output_padding=1, bias=False))
+                nn.ConvTranspose2d(in_channels=in_channels, out_channels=out_channels, kernel_size=3, stride=2, padding=1, output_padding=1, bias=True))
         else :
             layers.append(
-                nn.ConvTranspose2d(in_channels=in_channels, out_channels=out_channels, kernel_size=3, stride=2, padding=0, bias=False))
+                nn.ConvTranspose2d(in_channels=in_channels, out_channels=out_channels, kernel_size=3, stride=2, padding=0, bias=True))
         layers.append(nn.LeakyReLU(inplace=True))
 
         post_model = nn.Sequential(*layers)

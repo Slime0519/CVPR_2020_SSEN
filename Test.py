@@ -9,6 +9,7 @@ from Models.show.Baseline_big_show import BigBaseline_show
 from Models.show.Baseline_show import Baseline_show
 from Models.show.Baseline_small_show import Baseline_small_show
 from Models.show.Baseline128_show import Baseline128_show
+from Models.EDSR.EDSR_baseline import EDSR_baseline
 from torch.utils.data import DataLoader
 import argparse
 
@@ -51,6 +52,8 @@ if __name__ == "__main__":
         prefix_resultname = "normalModel_cosine_concat"
     elif Modelsize == "big":
         prefix_resultname = "bigModel"
+    elif Modelsize == "EDSR":
+        prefix_resultname = "EDSR"
     else:
         prefix_resultname = "smallModel"
 
@@ -93,6 +96,10 @@ if __name__ == "__main__":
     elif Modelsize == "normal128":
         print("load normal128 model")
         testmodel = Baseline128_show(mode = "concat")
+    elif Modelsize == "EDSR":
+        print("load EDSR baseline")
+        Model = EDSR_baseline()
+        Model.load_pretrained_model()
     else :
         print("load small baseline module")
         testmodel = Baseline_small()

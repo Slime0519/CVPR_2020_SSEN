@@ -18,7 +18,7 @@ class EDSR_baseline(nn.Module):
         self.lrfeature_ext2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, padding=1, bias=True)
 
         self.feature_extraction_network = feature_extraction_network(in_channels=64)
-        self.ssen = SSEN_show(in_channels = 64, mode = "add")
+        self.ssen = SSEN(in_channels = 64, mode = "add")
         self.EDSR = EDSR()
 
     def forward(self,lrinput,refinput):

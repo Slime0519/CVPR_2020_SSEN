@@ -13,9 +13,9 @@ class Dynamic_offset_estimator_show(nn.Module):
         self.attentionblock2 = Nonlocal_block(input_channelsize=64)
         self.attentionblock3 = Nonlocal_block(input_channelsize=64)
         """
-        self.attentionblock1 = NONLocalBlock2D(input_channels=64,)
-        self.attentionblock2 = NONLocalBlock2D(input_channels=64)
-        self.attentionblock3 = NONLocalBlock2D(input_channels=64)
+        self.attentionblock1 = NONLocalBlock2D(in_channels=64)
+        self.attentionblock2 = NONLocalBlock2D(in_channels=64)
+        self.attentionblock3 = NONLocalBlock2D(in_channels=64)
 
         self.upblock1 = self.upsample_block()
         self.upblock2 = self.upsample_block()

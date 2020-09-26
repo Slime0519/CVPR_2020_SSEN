@@ -14,7 +14,7 @@ from torch.utils.data import DataLoader
 import argparse
 
 
-
+import torch.nn as nn
 from utils import regularization_image, getPSNR
 import numpy as np
 import os
@@ -100,6 +100,7 @@ if __name__ == "__main__":
         print("load EDSR baseline")
         testmodel = EDSR_baseline()
         if showmode == "show":
+            print("load EDSRShow")
             testmodel = EDSR_baseline_show()
     else :
         print("load small baseline module")
@@ -119,13 +120,14 @@ if __name__ == "__main__":
     loadedmodel = checkpoint['model']
     state_dict =  loadedmodel.state_dict()
     # create new OrderedDict that does not contain `module.`
-
+   # testmodel = nn.DataParallel(testmodel)
     new_state_dict = OrderedDict()
     for k, v in state_dict.items():
         name = k[7:]  # remove `module.`
         new_state_dict[name] = v
     # load params
     testmodel.load_state_dict(new_state_dict)
+#    testmodel.load_state_dict(state_dict)
 
 
  #   testmodel.load_state_dict(
@@ -161,7 +163,7 @@ if __name__ == "__main__":
         PSNRarr[i] = PSNR
 
         input_temp = np.array(input.cpu().detach())
-        input_bicubic = cv2.resize(np.transpose(np.squeeze(input_temp), (1, 2, 0)), dsize=(0, 0), fx=4, fy=4,
+        input_bicubic = cv2.resize(np.transpose(np.squeeze(input_temp), (1, 2, 0)), dsize=(0, 0), fx=2, fy=2,
                                    interpolation=cv2.INTER_CUBIC)
         regularized_input_image = regularization_image(input_bicubic)
         regularized_input_image = (regularized_input_image * 255).astype(np.uint8)

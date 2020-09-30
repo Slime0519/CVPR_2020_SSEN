@@ -1,5 +1,5 @@
 import torch.optim as optim
-from cosine_annearing_with_warmup import CosineAnnealingWarmUpRestarts
+from Modules.optimizer.cosine_annearing_with_warmup import CosineAnnealingWarmUpRestarts
 import torchvision.models as models
 import numpy as np
 import matplotlib.pyplot as plt

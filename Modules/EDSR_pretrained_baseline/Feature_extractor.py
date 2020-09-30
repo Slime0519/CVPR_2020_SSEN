@@ -1,4 +1,4 @@
-from Models.Train_utils import make_residual_block
+from Modules.Model_utils import make_residual_block
 import torch.nn as nn
 
 class feature_extraction_network(nn.Module):

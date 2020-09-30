@@ -1,6 +1,6 @@
 import torch.nn as nn
 import torch
-from Models.Train_utils import make_residual_block
+from Modules.Model_utils import make_residual_block
 
 import torch.nn as nn
 from torchsummary import summary

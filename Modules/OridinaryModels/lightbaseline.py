@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
-from Models.Train.SSEN import SSEN
-from Models.Train_utils import make_residual_block, make_downsampling_network
+from Modules.common.SSEN import SSEN
+from Modules.Model_utils import make_residual_block, make_downsampling_network
 
 class Baseline_light(nn.Module):
     def __init__(self, num_channel = 64, mode = "concat"):

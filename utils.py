@@ -3,10 +3,17 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 
+from Modules.OridinaryModels.Baseline import Baseline,Baseline_show
+from Modules.OridinaryModels.Baseline_big import BigBaseline,BigBaseline_show
+from Modules.OridinaryModels.Baseline_small import Baseline_small,Baseline_small_show
+from Modules.OridinaryModels.lightbaseline import Baseline_light
+from Modules.OridinaryModels.Baseline128 import Baseline128,Baseline128_show
+
+from Modules.EDSR_pretrained_baseline.EDSR_baseline import EDSR_baseline, EDSR_baseline_show
+
 import cv2
 from Data_gen import Dataset_Test
 from torch.utils.data import DataLoader
-
 
 
 def showpatch(imagepatch,  modelname ,foldername=None, istensor = True):
@@ -67,6 +74,13 @@ def saveoffset(offsetbatch, modelname, foldername, istensor = False):
 
 
 
+def getPSNR(image1, image2):
+    MSE = (np.square(image1-image2)).mean(axis = None)
+
+    PSNR = 20*np.log10(1/np.sqrt(MSE))
+    return PSNR
+
+
 def regularization_image(image):
     min = np.min(image)
     temp_image = image-min
@@ -77,86 +91,87 @@ def regularization_image(image):
     return temp_image
 
 
-def getPSNR(image1, image2):
-#    shape = image1.shape[0]
+def regularize_testimage(image, istensor=True):
+    if istensor:
+        image = np.array(image.cpu().detach())
+    else:
+        image = np.array(image)
+    image = image.squeeze()
+    image = regularization_image(image)
+    return image
 
-#    MSE = (image1-image2)**2
- #   MSE = np.sum(MSE)
+def getprefixname(modeltype):
+    if modeltype == "normal_concat":
+        prefix_resultname = "normalModel_concat"
+    elif modeltype == "normal":
+        prefix_resultname = "normalModel"
+    elif modeltype == "normal_cosine":
+        prefix_resultname = "normalModel_cosine"
+    elif modeltype == "normal128":
+        prefix_resultname = "normalModel_model128"
+    elif modeltype == "normal_cosine_concat":
+        prefix_resultname = "normalModel_cosine_concat"
+    elif modeltype == "normal_light":
+        prefix_resultname = "normalModel_light"
+    elif modeltype == "big":
+        prefix_resultname = "bigModel"
+    elif modeltype == "EDSR_pretrained_baseline":
+        prefix_resultname = "EDSR_pretrained_baseline"
+    else:
+        prefix_resultname = "smallModel"
 
-   # MSE = MSE/(shape**2)
-    MSE = (np.square(image1-image2)).mean(axis = None)
+    return prefix_resultname
 
-    PSNR = 20*np.log10(1/np.sqrt(MSE))
-    return PSNR
+def loadmodel(modeltype):
+    if modeltype == "normal_concat" or modeltype == "normal_cosine_concat":
+        print("load concat baseline module")
+        Model = Baseline(mode="concat")
+    elif modeltype == "normal" or modeltype == "normal_cosine":
+        print("load original baseline module")
+        Model = Baseline()
+    elif modeltype == "normal128":
+        print("load normal128 model")
+        Model = Baseline128(mode="concat")
+    elif modeltype == "normal_light":
+        print("load light extraction model")
+        Model = Baseline_light()
+    elif modeltype == "big":
+        print("load big baseline module")
+        Model = BigBaseline()
+    elif modeltype == "EDSR_pretrained_baseline":
+        print("load EDSR_pretrained_baseline baseline")
+        Model = EDSR_baseline()
+        Model.load_pretrained_model()
+    else:
+        print("load small baseline module")
+        Model = Baseline_small()
 
-def pointdot(img, coordtuple = (10,10)):
-    dpi = 10
+    return Model
 
-    # Set red pixel value for RGB image
-    red = [1, 0, 0]
-    height, width, bands = img.shape
-
-    # Update figure size based on image size
-    figsize = width / float(dpi), height / float(dpi)
-
-    # Create a figure of the right size with one axes that takes up the full figure
-    figure = plt.figure(figsize=figsize)
-    axes = figure.add_axes([0, 0, 1, 1])
-
-    # Hide spines, ticks, etc.
-    axes.axis('off')
-
-    # Draw a red dot at pixel (62,62) to (66, 66)
-    #for i in range(62, 67):
-     #   for j in range(62, 67):
-      #    img[i][j] = red
-    img[coordtuple[0]:coordtuple[0]+5,coordtuple[1]:coordtuple[1]+5,:] = red
-    # Draw the image
-    axes.imshow(img, interpolation='nearest')
-    plt.show()
-    #figure.savefig("test.png", dpi=dpi, transparent=True)
-
-#def pointdeformoffset():
-
-
+def loadshowmodel(modeltype):
+    if modeltype == "normal":
+        testmodel = Baseline_show()
+    elif modeltype == "normal_concat" or modeltype == "normal_cosine_concat":
+        print("load concat baseline module")
+        testmodel = Baseline_show(mode="concat")
+    elif modeltype == "big":
+        print("load big baseline module")
+        testmodel = BigBaseline_show()
+    elif modeltype == "normal128":
+        testmodel = Baseline128_show(mode="concat")
+    elif modeltype == "EDSR_pretrained_baseline":
+        print("load EDSR_pretrained_baseline baseline")
+        print("load EDSR_Show")
+        testmodel = EDSR_baseline_show()
+    else:
+        print("load small baseline module")
+        testmodel = Baseline_small_show()
+    return testmodel
 
 if __name__ == "__main__":
-    """
-    array1 = np.random.rand(3,100,100)
-    array1 = np.expand_dims(array1,axis=0)
 
-    array2 = np.random.rand(3, 100, 100)
-    array2 = np.expand_dims(array2,axis=0)
-    array3 = np.concatenate((array1,array2),axis=0)
-    print(array3.shape)
-    showpatch(array3,foldername="test",istensor=False)
-    
-    testset_dirpath = "CUFED_SRNTT/CUFED5"
-    Test_Dataset = Dataset_Test(dirpath=testset_dirpath, upscale_factor=4, mode="XH")
-    Test_Dataloader = DataLoader(dataset=Test_Dataset, shuffle=False, batch_size=1, num_workers=0)
-
-    for i,(input, target, ref) in enumerate(Test_Dataloader):
-        if i == 0:
-            continue
-        inputarray = np.array(ref.cpu().detach())
-        inputarray = np.transpose(np.squeeze(inputarray), (1, 2, 0))
-        print(inputarray.shape)
-        inputarray = regularization_image(inputarray)
-        pointdot(inputarray)
-
-        break
-    """
     offset1= np.load("Network_patches/offset/offset_deformconv1.npy")
     offset1 = saveoffset(offset1)
     print(offset1.shape)
     print(offset1[40][40])
 
-"""
-    array1 = torch.zeros([2, 18, 40, 40], dtype=torch.float32)
-    for i in range(9):
-        array1[0, 2 * i:2 * (i + 1), :, :] = i
-    for i in range(9):
-        array1[1, 2 * i:2 * (i + 1), :, :] = 8 - i
-    # print(array1[:,:,0,0])
-    saveoffset(array1)
-"""

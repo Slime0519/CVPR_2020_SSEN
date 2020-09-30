@@ -1,28 +1,18 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import argparse
+import numpy as np
+import os
+import utils
+import tqdm
 
 from torch.utils.data import DataLoader
 
 from Data_gen import Dataset_Vaild, Dataset_Train
-from Models.Train.Baseline import Baseline
-from Models.Train.Baseline_big import BigBaseline
-from Models.Train.Baseline_small import Baseline_small
-from Models.Train.lightbaseline import Baseline_light
-from Models.Train.Baseline128 import Baseline128
-from Models.EDSR.EDSR_baseline import EDSR_baseline
-
-from cosine_annearing_with_warmup import CosineAnnealingWarmUpRestarts
-
-import argparse
-import numpy as np
-import os
-
-import tqdm
-#from torch.utils.tensorboard import SummaryWriter
-from torch.utils.tensorboard import SummaryWriter
-from Models.Train_utils import L1_Charbonnier_loss
-from CosineAnnealing_lr import get_lr
+from Modules.Model_utils import L1_Charbonnier_loss
+from Modules.optimizer.CosineAnnealing_lr import get_lr
+from Modules.optimizer.cosine_annearing_with_warmup import CosineAnnealingWarmUpRestarts
 
 
 parser = argparse.ArgumentParser(description="RefSR Network with SSEN Training module")
@@ -32,19 +22,18 @@ parser.add_argument('--batch_size', type = int, default = 32, help = "Batch size
 parser.add_argument('--learning_rate', type = float, default=1e-4, help ="learning rate")
 parser.add_argument('--gamma', type = float, default = 0.9, help = 'momentum of ADAM optimizer')
 parser.add_argument('--pretrained_epoch', type=int, default=0, help ='pretrained models epoch')
-parser.add_argument('--model_size', type = str, default="normal_concat", help = 'select model size')
+parser.add_argument('--model_type', type = str, default="normal_concat", help = 'select model size')
 
 if __name__ == "__main__":
     opt = parser.parse_args()
 
     TOTAL_EPOCHS = opt.num_epochs
     PRETRAINED_PATH = opt.pre_trained
-  #  PRERESULTED_PATH = opt.pre_resulted
     BATCH_SIZE = opt.batch_size
     lr = opt.learning_rate
     gamma = opt.gamma
     PRETRAINED_EPOCH = opt.pretrained_epoch
-    Modelsize = opt.model_size
+    modeltype = opt.model_type
 
     TrainDIR_PATH = "CUFED_SRNTT/input/"
     RefDIR_PATH = "CUFED_SRNTT/ref/"
@@ -58,25 +47,7 @@ if __name__ == "__main__":
     else:
         device = torch.device('cpu')
 
-
-    if Modelsize == "normal_concat":
-        prefix_resultname = "normalModel_concat"
-    elif Modelsize == "normal":
-        prefix_resultname = "normalModel"
-    elif Modelsize == "normal_cosine":
-        prefix_resultname = "normalModel_cosine"
-    elif Modelsize == "normal128":
-        prefix_resultname = "normalModel_model128"
-    elif Modelsize == "normal_cosine_concat":
-        prefix_resultname = "normalModel_cosine_concat"
-    elif Modelsize == "normal_light":
-        prefix_resultname = "normalModel_light"
-    elif Modelsize == "big":
-        prefix_resultname = "bigModel"
-    elif Modelsize == "EDSR":
-        prefix_resultname = "EDSR"
-    else:
-        prefix_resultname = "smallModel"
+    prefix_resultname = utils.getprefixname(modeltype)
 
     TrainedMODEL_PATH = os.path.join(TrainedMODEL_PATH,prefix_resultname)
     if not os.path.isdir(TrainedMODEL_PATH):
@@ -85,47 +56,20 @@ if __name__ == "__main__":
     Train_Dataset = Dataset_Train(dirpath_input=TrainDIR_PATH, dirpath_ref=RefDIR_PATH, upscale_factor=4)
     Vaild_Dataset = Dataset_Vaild(dirpath=VaildDIR_PATH, upscale_factor=4)
 
-    if Modelsize == "EDSR":
+    if modeltype == "EDSR":
         Train_Dataset = Dataset_Train(dirpath_input=TrainDIR_PATH, dirpath_ref=RefDIR_PATH, upscale_factor=2)
         Vaild_Dataset = Dataset_Vaild(dirpath=VaildDIR_PATH, upscale_factor=2)
 
     Train_Dataloader = DataLoader(dataset=Train_Dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4, drop_last=False, pin_memory=True)
     Vaild_Dataloader = DataLoader(dataset=Vaild_Dataset, batch_size=4, shuffle=False, num_workers=4, drop_last=False)
 
-    if Modelsize == "normal_concat" or Modelsize == "normal_cosine_concat":
-        print("load concat baseline module")
-        Model = Baseline(mode= "concat")
-    elif Modelsize == "normal" or Modelsize == "normal_cosine":
-        print("load original baseline module")
-        Model = Baseline()
-    elif Modelsize == "normal128":
-        print("load normal128 model")
-        Model = Baseline128(mode = "concat")
-    elif Modelsize == "normal_light":
-        print("load light extraction model")
-        Model = Baseline_light()
-    elif Modelsize == "big":
-        print("load big baseline module")
-        Model = BigBaseline()
-    elif Modelsize == "EDSR":
-        print("load EDSR baseline")
-        Model = EDSR_baseline()
-        Model.load_pretrained_model()
-    else :
-        print("load small baseline module")
-        Model = Baseline_small()
-
-
-    #   writer = SummaryWriter('runs/CVPR_2020_SSEN')
+    Model = utils.loadmodel(modeltype)
 
     Model = nn.DataParallel(Model)
     Model = Model.to(device)
 
     optimizer = optim.Adam(Model.parameters(), lr=lr*0.01, betas=(0.9, 0.999))
 
-    # if not Modelsize == "normal_cosine" and Modelsize == "normal_cosine_concat" and  Modelsize == "normal128" and E
-  #      cosine_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=TOTAL_EPOCHS)
-   # else:
     print("load cosinescheduler")
     cosine_scheduler = CosineAnnealingWarmUpRestarts(optimizer=optimizer, T_0 = 190, T_up=10, T_mult=2, eta_max=lr, gamma = gamma, last_epoch = PRETRAINED_EPOCH -1)
     
@@ -202,8 +146,9 @@ if __name__ == "__main__":
 
             checkpoint = {
                 'model': Model,
-                'optimizer': optimizer,
-                'cos_sched': cosine_scheduler}
+                'optimizer': optimizer
+            #    'cos_sched': cosine_scheduler
+            }
             torch.save(checkpoint, os.path.join(TrainedMODEL_PATH,prefix_resultname+"_epoch{}.pth".format(epoch+1)))
             #torch.save(Model.state_dict(), os.path.join(TrainedMODEL_PATH,prefix_resultname+"_epoch{}.pth".format(epoch+1)))
 

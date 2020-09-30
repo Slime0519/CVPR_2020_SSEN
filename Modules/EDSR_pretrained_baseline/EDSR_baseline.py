@@ -1,8 +1,7 @@
 import torch.nn as nn
-from Models.EDSR.Feature_extractor import downsampling_network, feature_extraction_network
-from Models.EDSR.EDSR import EDSR, EDSR_show
-from Models.Train.SSEN import SSEN
-from Models.show.SSEN_show import SSEN_show
+from Modules.EDSR_pretrained_baseline.Feature_extractor import feature_extraction_network
+from Modules.EDSR_pretrained_baseline.EDSR import EDSR, EDSR_show
+from Modules.common.SSEN import SSEN, SSEN_show
 from utils import showpatch
 
 import os
@@ -38,8 +37,9 @@ class EDSR_baseline(nn.Module):
 
     def load_pretrained_model(self):
         print(os.path.abspath('./edsr_baseline_x2.pt'))
-        dict = torch.load('Models/EDSR/edsr_baseline_x2-1bc95232.pt')
+        dict = torch.load('Modules/EDSR_pretrained_baseline/edsr_baseline_x2-1bc95232.pt')
         self.EDSR.load_state_dict(dict, strict=False)
+
 
 class EDSR_baseline_show(nn.Module):
     def __init__(self):

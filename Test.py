@@ -1,21 +1,11 @@
 import torch
 import Data_gen
 
-from Models.Train.Baseline import Baseline
-from Models.Train.Baseline_big import BigBaseline
-from Models.Train.Baseline_small import Baseline_small
-
-from Models.show.Baseline_big_show import BigBaseline_show
-from Models.show.Baseline_show import Baseline_show
-from Models.show.Baseline_small_show import Baseline_small_show
-from Models.show.Baseline128_show import Baseline128_show
-from Models.EDSR.EDSR_baseline import EDSR_baseline, EDSR_baseline_show
 from torch.utils.data import DataLoader
 import argparse
+import utils
+from utils import regularization_image, getPSNR,regularize_testimage
 
-
-import torch.nn as nn
-from utils import regularization_image, getPSNR
 import numpy as np
 import os
 import cv2
@@ -30,7 +20,7 @@ else:
     device = torch.device("cpu")
 
 parser = argparse.ArgumentParser(description="RefSR Network with SSEN Training module")
-parser.add_argument('--model_size', type = str, default="normal", help = "select model size")
+parser.add_argument('--model_type', type = str, default="normal", help = "select model size")
 parser.add_argument('--model_epoch', type = int, default = 700 , help = "pretrained model's epoch")
 parser.add_argument('--showmode', type = str, default= None, help = "show patches of each levels" )
 
@@ -38,29 +28,14 @@ if __name__ == "__main__":
 
     opt = parser.parse_args()
 
-    Modelsize = opt.model_size
+    modeltype = opt.model_typ
     model_epoch = opt.model_epoch
     showmode = opt.showmode
 
-    if Modelsize == "normal":
-        prefix_resultname = "normalModel"
-    elif Modelsize == "normal_concat":
-        prefix_resultname = "normalModel_concat"
-    elif Modelsize == "normal128":
-        prefix_resultname = "normalModel_model128"
-    elif Modelsize == "normal_cosine_concat":
-        prefix_resultname = "normalModel_cosine_concat"
-    elif Modelsize == "big":
-        prefix_resultname = "bigModel"
-    elif Modelsize == "EDSR":
-        prefix_resultname = "EDSR"
-    else:
-        prefix_resultname = "smallModel"
-
     testset_dirpath = "CUFED_SRNTT/CUFED5"
 
+    prefix_resultname = utils.getprefixname(modeltype)
     model_dirpath = os.path.join("Trained_model",prefix_resultname)
-
     image_savepath = os.path.join(savedir,prefix_resultname,"epoch{}".format(model_epoch))
 
     if not os.path.isdir(os.path.join(savedir,prefix_resultname)):
@@ -77,62 +52,32 @@ if __name__ == "__main__":
     if not os.path.isdir(os.path.join(image_savepath,"target")):
         os.mkdir(os.path.join(image_savepath,"target"))
 
+    if showmode != "show":
+        testmodel = utils.loadmodel(modeltype)
+    else:
+        testmodel = utils.loadshowmodel(modeltype)
 
-    if Modelsize == "normal":
-        print("load original baseline module")
-        testmodel = Baseline()
-        if showmode == "show":
-            testmodel = Baseline_show()
-    elif Modelsize == "normal_concat" or Modelsize == "normal_cosine_concat":
-        print("load concat baseline module")
-        testmodel = Baseline(mode = "concat")
-        if showmode == "show":
-            testmodel = Baseline_show(mode = "concat")
-    elif Modelsize == "big":
-        print("load big baseline module")
-        testmodel = BigBaseline()
-        if showmode == "show":
-            testmodel = BigBaseline_show()
-    elif Modelsize == "normal128":
-        print("load normal128 model")
-        testmodel = Baseline128_show(mode = "concat")
-    elif Modelsize == "EDSR":
-        print("load EDSR baseline")
-        testmodel = EDSR_baseline()
-        if showmode == "show":
-            print("load EDSRShow")
-            testmodel = EDSR_baseline_show()
-    else :
-        print("load small baseline module")
-        testmodel = Baseline_small()
-        if showmode == "show":
-            print("load showversion")
-            testmodel = Baseline_small_show()
-    
     testmodel.to(device)
+
     Test_Dataset = Data_gen.Dataset_Test(dirpath=testset_dirpath,upscale_factor=4, mode = "XH")
-    if Modelsize == "EDSR":
+    if modeltype == "EDSR":
        Test_Dataset = Data_gen.Dataset_Test(dirpath = testset_dirpath, upscale_factor =2 ,mode = "XH")
 
     Test_Dataloader = DataLoader(dataset=Test_Dataset, shuffle=False, batch_size=1, num_workers=0)
+
     # original saved file with DataParallel
     checkpoint = torch.load(os.path.join(model_dirpath,prefix_resultname+"_epoch{}.pth".format(model_epoch)))
     loadedmodel = checkpoint['model']
     state_dict =  loadedmodel.state_dict()
+
     # create new OrderedDict that does not contain `module.`
-   # testmodel = nn.DataParallel(testmodel)
     new_state_dict = OrderedDict()
     for k, v in state_dict.items():
         name = k[7:]  # remove `module.`
         new_state_dict[name] = v
     # load params
     testmodel.load_state_dict(new_state_dict)
-#    testmodel.load_state_dict(state_dict)
 
-
- #   testmodel.load_state_dict(
-  #      torch.load(os.path.join(model_dirpath,"larger_Model_epoch{}.pth".format(model_epoch))))
-    #testmodel = testmodel.to(device)
     testmodel.eval()
     PSNRarr = np.zeros(len(Test_Dataloader))
 
@@ -144,20 +89,12 @@ if __name__ == "__main__":
         input, refimage = input.to(device), refimage.to(device)
 #        output = testmodel(input,refimage, showmode = True)
         output = testmodel(input, refimage)
-
-        output_image = np.array(output.cpu().detach())
-        output_image = output_image.squeeze()
-        regularized_output_image = regularization_image(output_image)
         
-        target_image = np.array(target)
-        target_image = np.squeeze(target_image)
-        target_image = regularization_image(target_image)
-
-        ref_image = np.array(refimage.cpu().detach())
-        ref_image = ref_image.squeeze()
-        regularized_ref_image = regularization_image(ref_image)
-
-        PSNR = getPSNR(regularized_output_image, target_image)
+        regularized_output = regularize_testimage(output, istensor=True)
+        regularized_target = regularize_testimage(target, istensor=False)
+        regularized_ref = regularize_testimage(refimage, istensor=True)
+        
+        PSNR = getPSNR(regularized_output, regularized_target)
 
         print("PSNR : {}".format(PSNR))
         PSNRarr[i] = PSNR
@@ -168,32 +105,32 @@ if __name__ == "__main__":
         regularized_input_image = regularization_image(input_bicubic)
         regularized_input_image = (regularized_input_image * 255).astype(np.uint8)
         
-        regularized_ref_image = (ref_image * 255).astype(np.uint8)
-        regularized_ref_image = np.transpose(regularized_ref_image,(1,2,0))
+        regularized_ref = (regularized_ref * 255).astype(np.uint8)
+        regularized_ref = np.transpose(regularized_ref,(1,2,0))
         
-        target_image = (target_image * 255).astype(np.uint8)
-        target_image = np.transpose(target_image, (1, 2, 0))
+        regularized_target = (regularized_target * 255).astype(np.uint8)
+        regularized_target = np.transpose(regularized_target, (1, 2, 0))
 
-        regularized_output_image = (regularized_output_image * 255).astype(np.uint8)
-        regularized_output_image = np.transpose(regularized_output_image, (1, 2, 0))
+        regularized_output = (regularized_output * 255).astype(np.uint8)
+        regularized_output = np.transpose(regularized_output, (1, 2, 0))
 
 
         # PNG Image 저장
-        PIL_Input_Image = Image.fromarray(regularized_input_image)
-        PIL_Input_Image.save(os.path.join(image_savepath,"input/image{}.png".format(i)))  # save large size image
+        PIL_Input_image = Image.fromarray(regularized_input_image)
+        PIL_Input_image.save(os.path.join(image_savepath,"input/image{}.png".format(i)))  # save large size image
         #PIL_Input_Image.save("Result_image/input/image{}.png".format(i))
         
-        PIL_output_Image = Image.fromarray(regularized_output_image)
-        PIL_output_Image.save(os.path.join(image_savepath,"output/image{}.png".format(i)))
+        PIL_output_image = Image.fromarray(regularized_output)
+        PIL_output_image.save(os.path.join(image_savepath,"output/image{}.png".format(i)))
         #PIL_Input_Image.save("Result_image/output/image{}.png".format(i))
 
-        PIL_ref_Image = Image.fromarray(regularized_ref_image)
+        PIL_ref_image = Image.fromarray(regularized_ref)
         #PIL_Input_Image.save("Result_image/reference/image{}.png".format(i))
-        PIL_ref_Image.save(os.path.join(image_savepath,"reference/image{}.png".format(i)))
+        PIL_ref_image.save(os.path.join(image_savepath,"reference/image{}.png".format(i)))
 
-        PIL_target_Image = Image.fromarray(target_image)
+        PIL_target_image = Image.fromarray(regularized_target)
         #PIL_Input_Image.save("Result_image/target/image{}.png".format(i))
-        PIL_target_Image.save(os.path.join(image_savepath,"target/image{}.png".format(i)))
+        PIL_target_image.save(os.path.join(image_savepath,"target/image{}.png".format(i)))
 
         np.save(os.path.join(image_savepath,"{}_PSNRlist.npy".format(prefix_resultname)),PSNRarr)
         if showmode == "show":

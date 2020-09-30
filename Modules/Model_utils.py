@@ -46,3 +46,29 @@ def make_downsampling_network(layernum = 2, in_channels = 3, out_channels = 64):
     print(layers)
     model = nn.Sequential(*layers)
     return model
+
+
+def DOE_downsample_block(input_channelsize):
+    layers = []
+    layers.append(
+        nn.Conv2d(in_channels=input_channelsize, out_channels=64, kernel_size=3, stride=2, padding=1, bias=True))
+    layers.append(nn.LeakyReLU(inplace=True))
+
+    pre_model = nn.Sequential(*layers)
+    return pre_model
+
+def DOE_upsample_block(in_odd = True, in_channels = 64, out_channels = 64):
+    layers = []
+
+    if in_odd:
+        layers.append(
+            nn.ConvTranspose2d(in_channels=in_channels, out_channels=out_channels, kernel_size=3, stride=2, padding=1,
+                               output_padding=1, bias=True))
+    else:
+        layers.append(
+            nn.ConvTranspose2d(in_channels=in_channels, out_channels=out_channels, kernel_size=3, stride=2, padding=0,
+                               bias=True))
+    layers.append(nn.LeakyReLU(inplace=True))
+
+    post_model = nn.Sequential(*layers)
+    return post_model

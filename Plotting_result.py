@@ -6,7 +6,7 @@ import argparse
 ResultSave_PATH = "Result_metrics"
 
 parser = argparse.ArgumentParser(description="RefSR Network with SSEN Training module")
-parser.add_argument('--model_size', type = str, default="EDSR", help = "select model size")
+parser.add_argument('--model_size', type = str, default="EDSR_pretrained_baseline", help = "select model size")
 
 def get_length(array):
     i = 0
@@ -50,8 +50,8 @@ if __name__ == "__main__":
         prefix_resultname = "bigModel"
     elif Modelsize == 'normal_light':
         prefix_resultname = "normalModel_light"
-    elif Modelsize == "EDSR":
-        prefix_resultname = "EDSR"
+    elif Modelsize == "EDSR_pretrained_baseline":
+        prefix_resultname = "EDSR_pretrained_baseline"
     else:
         prefix_resultname = "smallModel"
 

@@ -31,14 +31,19 @@ In paper, authors description non-local blocks in the dynamic offset estimator t
 attention in each level of scale.
 
 
-##Dataset
+## Dataset
 
 | Dataset name | usage               | link                                                                   |
 |--------------|---------------------|------------------------------------------------------------------------|
 | CUFED        | Training/Validation | https://drive.google.com/open?id=1hGHy36XcmSZ1LtARWmGL5OK1IUdWJi3I     |
 | CUFED5       | Test                | https://drive.google.com/file/d/1Fa1mopExA9YGG1RxrCZZn7QFTYXLx6ph/view |
 
-## Implementation
+## Implementation Detail
+1. Feature Extractor : 4 (CNN+ReLU) module (from "SRFeat: Single Image Super-Resolution with Feature Discrimination", ECCV 2018)
+    - downsampling reference image : Sequential Conv block with stride 2
+2. Baseline(Reconstruction block) : 16 Residual blocks with 64 channels (from "Enhanced Deep Residual Networks for Single Image Super-Resolution", CVPR 2018)
+   
+3. Deformable Convolution : use MMCV library (https://github.com/open-mmlab/mmcv)
 
 ## To-Do list
 

@@ -30,6 +30,14 @@ Dynamic offset estimator contains non-local blocks, for improvement of feature e
 In paper, authors description non-local blocks in the dynamic offset estimator that the features are amplified with
 attention in each level of scale.
 
+
+##Dataset
+
+| Dataset name | usage               | link                                                                   |
+|--------------|---------------------|------------------------------------------------------------------------|
+| CUFED        | Training/Validation | https://drive.google.com/open?id=1hGHy36XcmSZ1LtARWmGL5OK1IUdWJi3I     |
+| CUFED5       | Test                | https://drive.google.com/file/d/1Fa1mopExA9YGG1RxrCZZn7QFTYXLx6ph/view |
+
 ## Implementation
 
 ## To-Do list
@@ -69,7 +77,7 @@ attention in each level of scale.
     - [x] implementation evaluation code
    
 4. Additional Task
-    - [] Attach GAN module(PatchGAN)
+    - [ ] Attach GAN module(PatchGAN)
 
 
 ## References

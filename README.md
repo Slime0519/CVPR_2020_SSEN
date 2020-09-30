@@ -37,39 +37,39 @@ attention in each level of scale.
 1. Network implementation   
     1. baseline
     
-        - [ ] Baseline implementation(stacked residual blocks)
+        - [x] Baseline implementation(stacked residual blocks)
     2. SSEN
         - implementation deformconv
-            - [ ] Study code of Deformable Convolutional Network
-            - [ ] implementation Dynamic Offset Estimator(DOE)
+            - [x] Study code of Deformable Convolutional Network
+            - [x] implementation Dynamic Offset Estimator(DOE)
                 + implementation non-local block
-            - [ ] combine two module(DOE, original DeformConv)
+            - [x] combine two module(DOE, original DeformConv)
         - make entire SSEN structure
-            - [ ] connect with feature extractor in baseline
-            - [ ] append deformconv blocks sequentially
+            - [x] connect with feature extractor in baseline
+            - [x] append deformconv blocks sequentially
     3. connect two network
-        - [ ] summary two models  using pysummary library
-        - [ ] attach SSEN to Baseline of RefSR network
+        - [x] summary two models  using pysummary library
+        - [x] attach SSEN to Baseline of RefSR network
     
 2. Get dataset and preprocessing
-    - [ ] get CUFED dataset for training
-    - [ ] get CUFED5 dataset for test
-    - [ ] implementation Dataloader for each tasks(training, vaild, evaluation)
+    - [x] get CUFED dataset for training
+    - [x] get CUFED5 dataset for test
+    - [x] implementation Dataloader for each tasks(training, vaild, evaluation)
         - apply random 90 degree rotation for augmentation 
         - scaling factor : 4
     
 3. Training & Test
-    - [ ] implementation Training code
+    - [x] implementation Training code
         - using ADAM optimizer 
         - lr : 1e^-4
         - b1,b2 = 0.9, 0.999
         - batch size : 32
         - epochs : 100k
         - lr scheduling : consine learning rate schedule, gamma = 0.9
-    - [ ] implementation evaluation code
+    - [x] implementation evaluation code
    
 4. Additional Task
-    - [ ] Attach GAN module(PatchGAN)
+    - [] Attach GAN module(PatchGAN)
 
 
 ## References

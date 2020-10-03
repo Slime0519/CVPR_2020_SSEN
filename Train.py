@@ -1,11 +1,8 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import argparse
 import numpy as np
-import os
-import utils
-import tqdm
+import os, tqdm, modelref_utils, argparse
 
 from torch.utils.data import DataLoader
 
@@ -47,7 +44,7 @@ if __name__ == "__main__":
     else:
         device = torch.device('cpu')
 
-    prefix_resultname = utils.getprefixname(modeltype)
+    prefix_resultname = modelref_utils.getprefixname(modeltype)
 
     TrainedMODEL_PATH = os.path.join(TrainedMODEL_PATH,prefix_resultname)
     if not os.path.isdir(TrainedMODEL_PATH):
@@ -63,7 +60,7 @@ if __name__ == "__main__":
     Train_Dataloader = DataLoader(dataset=Train_Dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4, drop_last=False, pin_memory=True)
     Vaild_Dataloader = DataLoader(dataset=Vaild_Dataset, batch_size=4, shuffle=False, num_workers=4, drop_last=False)
 
-    Model = utils.loadmodel(modeltype)
+    Model = modelref_utils.loadmodel(modeltype)
 
     Model = nn.DataParallel(Model)
     Model = Model.to(device)

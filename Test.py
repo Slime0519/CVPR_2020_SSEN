@@ -3,7 +3,7 @@ import Data_gen
 
 from torch.utils.data import DataLoader
 import argparse
-import utils
+import modelref_utils
 from utils import regularization_image, getPSNR,regularize_testimage
 
 import numpy as np
@@ -34,7 +34,7 @@ if __name__ == "__main__":
 
     testset_dirpath = "CUFED_SRNTT/CUFED5"
 
-    prefix_resultname = utils.getprefixname(modeltype)
+    prefix_resultname = modelref_utils.getprefixname(modeltype)
     model_dirpath = os.path.join("Trained_model",prefix_resultname)
     image_savepath = os.path.join(savedir,prefix_resultname,"epoch{}".format(model_epoch))
 
@@ -53,9 +53,9 @@ if __name__ == "__main__":
         os.mkdir(os.path.join(image_savepath,"target"))
 
     if showmode != "show":
-        testmodel = utils.loadmodel(modeltype)
+        testmodel = modelref_utils.loadmodel(modeltype)
     else:
-        testmodel = utils.loadshowmodel(modeltype)
+        testmodel = modelref_utils.loadshowmodel(modeltype)
 
     testmodel.to(device)
 

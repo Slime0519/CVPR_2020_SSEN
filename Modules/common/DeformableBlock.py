@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 
 from Modules.common.Dynamic_offset_estimator import Dynamic_offset_estimator, Dynamic_offset_estimator_concat
+
+
 from mmcv.ops.deform_conv import DeformConv2d
 from utils import saveoffset, showpatch
 
@@ -16,7 +18,7 @@ class DeformableConvBlock(nn.Module):
                                      bias=True)
 
         self.deformconv = DeformConv2d(in_channels=input_channels, out_channels=input_channels, kernel_size=3,
-                                       padding=1, bias=True)
+                                       padding=1)
 
     def forward(self, lr_features, hr_features):
         input_offset = torch.cat((lr_features, hr_features), dim=1)

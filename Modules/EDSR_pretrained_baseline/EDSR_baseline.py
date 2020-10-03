@@ -75,7 +75,7 @@ class EDSR_baseline_show(nn.Module):
 
 class EDSR_baseline_X4(nn.Module):
     def __init__(self):
-        super(EDSR_baseline, self).__init__()
+        super(EDSR_baseline_X4, self).__init__()
         self.relu = nn.ReLU(inplace=True)
         self.downsample_conv1 = nn.Conv2d(in_channels=3, out_channels=64, stride=2, kernel_size=3, padding=1, bias=True)
         self.downsample_conv2 = nn.Conv2d(in_channels=64, out_channels=64, stride=2, kernel_size=3, padding=1, bias=True)

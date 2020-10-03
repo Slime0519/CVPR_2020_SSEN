@@ -30,43 +30,56 @@ Dynamic offset estimator contains non-local blocks, for improvement of feature e
 In paper, authors description non-local blocks in the dynamic offset estimator that the features are amplified with
 attention in each level of scale.
 
-## Implementation
+
+## Dataset
+
+| Dataset name | usage               | link                                                                   |
+|--------------|---------------------|------------------------------------------------------------------------|
+| CUFED        | Training/Validation | https://drive.google.com/open?id=1hGHy36XcmSZ1LtARWmGL5OK1IUdWJi3I     |
+| CUFED5       | Test                | https://drive.google.com/file/d/1Fa1mopExA9YGG1RxrCZZn7QFTYXLx6ph/view |
+
+## Implementation Detail
+1. Feature Extractor : 4 (CNN+ReLU) module (from "SRFeat: Single Image Super-Resolution with Feature Discrimination", ECCV 2018)
+    - downsampling reference image : Sequential Conv block with stride 2
+2. Baseline(Reconstruction block) : 16 Residual blocks with 64 channels (from "Enhanced Deep Residual Networks for Single Image Super-Resolution", CVPR 2018)
+   
+3. Deformable Convolution : use MMCV library (https://github.com/open-mmlab/mmcv)
 
 ## To-Do list
 
 1. Network implementation   
     1. baseline
     
-        - [ ] Baseline implementation(stacked residual blocks)
+        - [x] Baseline implementation(stacked residual blocks)
     2. SSEN
         - implementation deformconv
-            - [ ] Study code of Deformable Convolutional Network
-            - [ ] implementation Dynamic Offset Estimator(DOE)
+            - [x] Study code of Deformable Convolutional Network
+            - [x] implementation Dynamic Offset Estimator(DOE)
                 + implementation non-local block
-            - [ ] combine two module(DOE, original DeformConv)
+            - [x] combine two module(DOE, original DeformConv)
         - make entire SSEN structure
-            - [ ] connect with feature extractor in baseline
-            - [ ] append deformconv blocks sequentially
+            - [x] connect with feature extractor in baseline
+            - [x] append deformconv blocks sequentially
     3. connect two network
-        - [ ] summary two models  using pysummary library
-        - [ ] attach SSEN to Baseline of RefSR network
+        - [x] summary two models  using pysummary library
+        - [x] attach SSEN to Baseline of RefSR network
     
 2. Get dataset and preprocessing
-    - [ ] get CUFED dataset for training
-    - [ ] get CUFED5 dataset for test
-    - [ ] implementation Dataloader for each tasks(training, vaild, evaluation)
+    - [x] get CUFED dataset for training
+    - [x] get CUFED5 dataset for test
+    - [x] implementation Dataloader for each tasks(training, vaild, evaluation)
         - apply random 90 degree rotation for augmentation 
         - scaling factor : 4
     
 3. Training & Test
-    - [ ] implementation Training code
+    - [x] implementation Training code
         - using ADAM optimizer 
         - lr : 1e^-4
         - b1,b2 = 0.9, 0.999
         - batch size : 32
         - epochs : 100k
         - lr scheduling : consine learning rate schedule, gamma = 0.9
-    - [ ] implementation evaluation code
+    - [x] implementation evaluation code
    
 4. Additional Task
     - [ ] Attach GAN module(PatchGAN)

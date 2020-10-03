@@ -40,6 +40,8 @@ class EDSR(nn.Module):
         m_tail = [
             nn.Conv2d(in_channels=64, out_channels=4 * 64, kernel_size=3, padding=1, bias=True),
             nn.PixelShuffle(2),
+            nn.Conv2d(in_channels=64, out_channels=3, kernel_size=3, padding=1, bias=True),
+            nn.PixelShuffle(2),
             nn.Conv2d(in_channels=64, out_channels=3, kernel_size=3, padding=1, bias=True)
         ]
 

@@ -9,7 +9,7 @@ from Modules.OridinaryModels.Baseline_small import Baseline_small,Baseline_small
 from Modules.OridinaryModels.lightbaseline import Baseline_light
 from Modules.OridinaryModels.Baseline128 import Baseline128,Baseline128_show
 
-from Modules.EDSR_pretrained_baseline.EDSR_baseline import EDSR_baseline, EDSR_baseline_show
+from Modules.EDSR_pretrained_baseline.EDSR_baseline import EDSR_baseline, EDSR_baseline_show,EDSR_baseline_X4
 
 import cv2
 from Data_gen import Dataset_Test
@@ -115,8 +115,10 @@ def getprefixname(modeltype):
         prefix_resultname = "normalModel_light"
     elif modeltype == "big":
         prefix_resultname = "bigModel"
-    elif modeltype == "EDSR_pretrained_baseline":
-        prefix_resultname = "EDSR_pretrained_baseline"
+    elif modeltype == "EDSR":
+        prefix_resultname = "EDSR"
+    elif modeltype == "EDSRx4":
+        prefix_resultname = "EDSRx4"
     else:
         prefix_resultname = "smallModel"
 
@@ -138,9 +140,12 @@ def loadmodel(modeltype):
     elif modeltype == "big":
         print("load big baseline module")
         Model = BigBaseline()
-    elif modeltype == "EDSR_pretrained_baseline":
-        print("load EDSR_pretrained_baseline baseline")
+    elif modeltype == "EDSR":
+        print("load EDSRx2 baseline")
         Model = EDSR_baseline()
+        Model.load_pretrained_model()
+    elif modeltype == "EDSRx4":
+        Model = EDSR_baseline_X4()
         Model.load_pretrained_model()
     else:
         print("load small baseline module")
@@ -159,10 +164,13 @@ def loadshowmodel(modeltype):
         testmodel = BigBaseline_show()
     elif modeltype == "normal128":
         testmodel = Baseline128_show(mode="concat")
-    elif modeltype == "EDSR_pretrained_baseline":
-        print("load EDSR_pretrained_baseline baseline")
+    elif modeltype == "EDSR":
+        print("load EDSRx2 baseline")
         print("load EDSR_Show")
         testmodel = EDSR_baseline_show()
+    elif modeltype == "EDSRx4":
+        print("load EDSRx4 baseline")
+        testmodel = EDSR_baseline_X4()
     else:
         print("load small baseline module")
         testmodel = Baseline_small_show()
